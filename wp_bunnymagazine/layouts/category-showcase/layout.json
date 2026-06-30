@@ -1,0 +1,31 @@
+{
+  "title": "Category Showcase",
+  "description": "Selected category with a lead story and a direct archive button.",
+  "block": {
+    "title": "Bunny Magazine Category Showcase",
+    "description": "Feature a selected category with a lead story.",
+    "query": {
+      "mode": "configurable",
+      "limit": 4,
+      "minItems": 1,
+      "maxItems": 8
+    },
+    "controls": {
+      "limitControl": true,
+      "categorySelector": true,
+      "sectionTitle": true,
+      "ctaLabel": true
+    }
+  },
+  "assets": {
+    "style": "style.css",
+    "editor": "editor.css"
+  },
+  "schema": {
+    "type": "category-showcase",
+    "areas": [
+      "header",
+      "lead"
+    ]
+  }
+}

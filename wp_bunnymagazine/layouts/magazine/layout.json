@@ -1,0 +1,30 @@
+{
+  "title": "Magazine Alternating",
+  "description": "Editorial alternating rhythm with image and text switching sides.",
+  "block": {
+    "title": "Bunny Magazine Magazine",
+    "description": "Alternating editorial composition.",
+    "query": {
+      "mode": "fixed",
+      "limit": 5,
+      "minItems": 5,
+      "maxItems": 5
+    },
+    "controls": {
+      "limitControl": false,
+      "ctaLabel": true
+    }
+  },
+  "assets": {
+    "style": "style.css",
+    "editor": "editor.css"
+  },
+  "schema": {
+    "type": "alternating-banner",
+    "areas": [
+      "story",
+      "media",
+      "content"
+    ]
+  }
+}

@@ -1,0 +1,168 @@
+/* =========================
+   BASE
+========================= */
+
+.wpbm-layout--carousel {
+	position: relative;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.wpbm-carousel__header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+/* =========================
+   VIEWPORT (🔥 CLAVE REAL)
+========================= */
+
+.wpbm-carousel__viewport {
+	width: 100%;
+	max-width: 100%;
+	overflow: hidden; /* 🔥 ESTO ES LO QUE TE FALTABA */
+	position: relative;
+}
+
+/* =========================
+   TRACK (fila horizontal real)
+========================= */
+
+.wpbm-carousel__track {
+	display: flex;
+	flex-wrap: nowrap;
+
+	width: 100%;
+	min-width: 100%;
+
+	overflow-x: auto;
+
+	scroll-snap-type: x mandatory;
+	scroll-behavior: smooth;
+
+	gap: 0.75rem;
+}
+
+/* ocultar scrollbar */
+.wpbm-carousel__track::-webkit-scrollbar {
+	display: none;
+}
+
+/* =========================
+   CARD
+========================= */
+
+.wpbm-carousel__card {
+	flex: 0 0 auto;
+	width: clamp(260px, 30vw, 340px);
+
+	border-radius: var(--wpbm-radius, 14px);
+	overflow: hidden;
+
+	scroll-snap-align: start;
+	background: rgba(15, 23, 42, 0.88);
+	box-shadow: var(--wpbm-shadow);
+}
+
+.wpbm-layout--carousel .wpbm-carousel__title {
+	color: var(--wpbm-muted);
+}
+
+/* =========================
+   MEDIA
+========================= */
+
+.wpbm-carousel__media {
+	position: relative;
+	display: block;
+	width: 100%;
+	aspect-ratio: 1 / 1;
+}
+
+.wpbm-carousel__image {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* overlay */
+.wpbm-carousel__overlay {
+	position: absolute;
+	inset: auto 0 0 0;
+	padding: 1rem;
+
+	background: linear-gradient(to top, rgba(0,0,0,.85), transparent);
+	color: #fff;
+}
+
+/* =========================
+   FLECHAS (limpias tipo “hover rails”)
+========================= */
+
+.wpbm-carousel__button {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+
+	width: 60px;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	font-size: 2rem;
+
+	background: linear-gradient(
+		to right,
+		rgba(0,0,0,.35),
+		rgba(0,0,0,0)
+	);
+
+	color: white;
+	border: none;
+
+	opacity: 0;
+	transition: opacity .2s ease;
+	z-index: 5;
+}
+
+.wpbm-layout--carousel:hover .wpbm-carousel__button {
+	opacity: 1;
+}
+
+.wpbm-carousel__button--prev {
+	left: 0;
+}
+
+.wpbm-carousel__button--next {
+	right: 0;
+	background: linear-gradient(
+		to left,
+		rgba(0,0,0,.35),
+		rgba(0,0,0,0)
+	);
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 640px) {
+
+	.wpbm-carousel__card {
+		width: 80%;
+	}
+
+	.wpbm-carousel__button {
+		display: none;
+	}
+}

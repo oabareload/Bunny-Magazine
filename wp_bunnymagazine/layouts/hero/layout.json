@@ -1,0 +1,30 @@
+{
+  "title": "Hero",
+  "description": "Single featured story with oversized image, title, excerpt and CTA.",
+  "block": {
+    "title": "Bunny Magazine Hero",
+    "description": "Editorial lead block with one featured post.",
+    "query": {
+      "mode": "fixed",
+      "limit": 1,
+      "minItems": 1,
+      "maxItems": 1
+    },
+    "ctaLabel": "Read story",
+    "controls": {
+      "limitControl": false,
+      "ctaLabel": true
+    }
+  },
+  "assets": {
+    "style": "style.css",
+    "editor": "editor.css"
+  },
+  "schema": {
+    "type": "lead-story",
+    "areas": [
+      "media",
+      "content"
+    ]
+  }
+}

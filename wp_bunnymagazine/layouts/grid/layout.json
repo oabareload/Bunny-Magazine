@@ -1,0 +1,28 @@
+{
+  "title": "Grid",
+  "description": "Responsive editorial grid with strong image hierarchy.",
+  "block": {
+    "title": "Bunny Magazine Grid",
+    "description": "Responsive editorial grid.",
+    "query": {
+      "mode": "configurable",
+      "limit": 8,
+      "minItems": 2,
+      "maxItems": 20
+    },
+    "controls": {
+      "limitControl": true,
+      "ctaLabel": true
+    }
+  },
+  "assets": {
+    "style": "style.css",
+    "editor": "editor.css"
+  },
+  "schema": {
+    "type": "grid",
+    "areas": [
+      "card"
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "title": "Mosaic",
+  "description": "Editorial mosaic with one dominant story and secondary pieces.",
+  "block": {
+    "title": "Bunny Magazine Mosaic",
+    "description": "Dominant story with supporting cards.",
+    "query": {
+      "mode": "fixed",
+      "limit": 6,
+      "minItems": 6,
+      "maxItems": 6
+    },
+    "controls": {
+      "limitControl": false,
+      "ctaLabel": true
+    }
+  },
+  "assets": {
+    "style": "style.css",
+    "editor": "editor.css"
+  },
+  "schema": {
+    "type": "mosaic",
+    "areas": [
+      "lead",
+      "secondary"
+    ]
+  }
+}

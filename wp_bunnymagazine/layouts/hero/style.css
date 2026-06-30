@@ -1,0 +1,137 @@
+.wpbm-layout--hero {
+	padding: 0;
+}
+
+.wpbm-hero {
+	position: relative;
+	width: 100%;
+	aspect-ratio: 1 / 1 !important;
+	max-height: 700px;
+	border-radius: var(--wpbm-radius, 14px);
+	overflow: hidden;
+	background: #0b1220;
+	box-shadow: var(--wpbm-shadow);
+}
+
+.wpbm-hero__media {
+	position: relative;
+	display: block;
+	width: 100%;
+	height: 100%;
+	text-decoration: none;
+	color: inherit;
+}
+
+.wpbm-hero__image {
+	position: absolute !important;
+	inset: 0;
+	width: 100% !important;
+	height: 100% !important;
+	object-fit: cover;
+	object-position: center center;
+	display: block;
+}
+
+.wpbm-hero__scrim {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background:
+		linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0.85) 0%,
+			rgba(0, 0, 0, 0.55) 30%,
+			rgba(0, 0, 0, 0.15) 60%,
+			transparent 100%
+		);
+}
+
+.wpbm-hero__content {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 2;
+
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+
+	padding: 2rem;
+	max-width: none;
+
+	background: none;
+	border: 0;
+	backdrop-filter: none;
+	box-shadow: none;
+}
+
+.wpbm-layout--hero .wpbm-layout__eyebrow {
+	color: rgba(255,255,255,.75);
+	font-size: .85rem;
+	text-transform: uppercase;
+	letter-spacing: .08em;
+}
+
+.wpbm-layout--hero .wpbm-layout__title {
+	margin: 0;
+	color: #fff;
+	font-size: clamp(2rem, 4vw, 4rem);
+	line-height: 1.05;
+	text-shadow: 0 2px 12px rgba(0,0,0,.5);
+}
+
+.wpbm-layout--hero .wpbm-layout__excerpt {
+	display: none !important;
+}
+
+.wpbm-layout--hero .wpbm-layout__button {
+	display: inline-flex;
+	align-self: flex-start;
+
+	padding: .7rem 1.1rem;
+
+	background: rgba(255,255,255,.15);
+	backdrop-filter: blur(10px);
+
+	border-radius: 999px;
+
+	color: #fff;
+	font-weight: 600;
+	font-size: .9rem;
+}
+
+@media (max-width: 960px) {
+
+	.wpbm-hero {
+		aspect-ratio: 4 / 5 !important;
+	}
+
+	.wpbm-hero__content {
+		padding: 1.5rem;
+	}
+
+	.wpbm-layout--hero .wpbm-layout__title {
+		font-size: clamp(1.8rem, 5vw, 3rem);
+	}
+}
+
+@media (max-width: 640px) {
+
+	.wpbm-hero {
+		aspect-ratio: 1 / 1 !important;
+	}
+
+	.wpbm-hero__content {
+		padding: 1.25rem;
+	}
+
+	.wpbm-layout--hero .wpbm-layout__title {
+		font-size: 1.8rem;
+	}
+
+	.wpbm-layout--hero .wpbm-layout__button {
+		font-size: .85rem;
+		padding: .65rem 1rem;
+	}
+}

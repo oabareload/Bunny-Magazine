@@ -1,0 +1,110 @@
+.wp-block.wp-bunnymagazine-layout {
+	position: relative;
+}
+
+.wp-block.wp-bunnymagazine-layout a {
+	pointer-events: auto;
+}
+
+.wpbm-card {
+	overflow: hidden;
+}
+
+.wpbm-overlay {
+	position: absolute;
+	inset: 0;
+}
+
+.wpbm-layout {
+	position: relative;
+}
+
+.wpbm-layout__content {
+	position: relative;
+	z-index: 2;
+}
+
+.wpbm-layout {
+	--wpbm-bg: #0b1020;
+	--wpbm-surface: rgba(10, 16, 30, 0.92);
+	--wpbm-surface-2: rgba(23, 31, 47, 0.88);
+	--wpbm-text: #f8fafc;
+	--wpbm-muted: snow;
+	--wpbm-accent: #7dd3fc;
+	--wpbm-shadow: 0 20px 50px rgba(2, 6, 23, 0.26);
+	--wpbm-radius: 4px;
+	font-family: inherit;
+	color: var(--wpbm-text);
+	display: grid;
+	gap: 0.85rem;
+}
+
+.wpbm-layout a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.wpbm-layout img,
+.wpbm-layout .wpbm-post-image {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.wpbm-layout__eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	text-transform: uppercase;
+	letter-spacing: 0.14em;
+	font-size: 0.68rem;
+	color: var(--wpbm-accent);
+}
+
+.wpbm-layout__title {
+	margin: 0;
+	line-height: 0.94;
+	letter-spacing: -0.04em;	
+	color:var(--wpbm-muted);
+}
+
+.wpbm-layout__excerpt {
+	color: var(--wpbm-muted);
+	line-height: 1.55;
+}
+
+.wpbm-layout__button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.8rem 1rem;
+	border-radius: 12px;
+	background: rgba(125, 211, 252, 0.16);
+	border: 1px solid rgba(125, 211, 252, 0.24);
+	color: #e0f2fe;
+	font-weight: 700;
+	backdrop-filter: blur(10px);
+}
+
+.wpbm-layout__empty {
+	padding: 1.1rem 1.25rem;
+	border-radius: 12px;
+	background: rgba(15, 23, 42, 0.84);
+	color: var(--wpbm-muted);
+	border: 1px dashed rgba(125, 211, 252, 0.24);
+}
+
+.editor-styles-wrapper .wp-bunnymagazine-layout a,
+.editor-styles-wrapper .wp-bunnymagazine-layout button {
+	pointer-events: none !important;
+}
+
+.wpbm-editor-block {
+	min-height: 40px;
+	cursor: pointer;
+}
+
+.wpbm-editor-preview {
+	position: relative;
+}

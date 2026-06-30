@@ -1,0 +1,31 @@
+{
+  "title": "Carousel",
+  "description": "Horizontal editorial card rail with lightweight navigation.",
+  "block": {
+    "title": "Bunny Magazine Carousel",
+    "description": "Horizontal editorial card rail.",
+    "query": {
+      "mode": "configurable",
+      "limit": 8,
+      "minItems": 2,
+      "maxItems": 12
+    },
+    "controls": {
+      "limitControl": true,
+      "sectionTitle": true,
+      "ctaLabel": true
+    }
+  },
+  "assets": {
+    "style": "style.css",
+    "editor": "editor.css",
+    "script": "carousel.js"
+  },
+  "schema": {
+    "type": "rail",
+    "areas": [
+      "header",
+      "track"
+    ]
+  }
+}

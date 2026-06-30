@@ -1,0 +1,168 @@
+.wpbm-layout--magazine {
+	padding: 0;
+}
+
+.wpbm-magazine {
+	display: grid;
+	gap: 1rem;
+}
+
+/* CARD */
+
+.wpbm-magazine__story {
+	background: #111827;
+	border-radius: var(--wpbm-radius, 14px);
+	overflow: hidden;
+	box-shadow: var(--wpbm-shadow);
+
+	aspect-ratio: auto !important;
+	max-height: none !important;
+	min-height: 280px;
+}
+
+/* LAYOUT */
+
+.wpbm-magazine__media {
+	display: flex !important;
+	align-items: stretch;
+
+	height: 280px;
+	min-height: 280px;
+
+	text-decoration: none;
+	color: inherit;
+}
+
+.wpbm-magazine__story--reverse .wpbm-magazine__media {
+	flex-direction: row-reverse;
+}
+
+/* IMAGE */
+
+.wpbm-magazine__image {
+	position: relative !important;
+	inset: auto !important;
+
+	flex: 0 0 280px;
+	width: 280px;
+	min-width: 280px;
+	height: 100%;
+
+	display: block;
+	object-fit: cover;
+}
+
+/* CONTENT */
+
+.wpbm-magazine__overlay {
+	position: relative !important;
+	inset: auto !important;
+
+	flex: 1 1 auto;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: flex-start;
+
+	gap: 0.75rem;
+
+	padding: 1.5rem;
+
+	width: auto !important;
+	height: auto !important;
+	min-height: auto !important;
+	max-width: none !important;
+
+	background: #111827 !important;
+	border: 0 !important;
+	box-shadow: none !important;
+	backdrop-filter: none !important;
+
+	overflow: hidden;
+}
+
+.wpbm-layout--magazine .wpbm-layout__eyebrow {
+	margin: 0;
+
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	letter-spacing: .08em;
+	opacity: .7;
+}
+
+.wpbm-layout--magazine .wpbm-layout__title {
+	margin: 0;
+
+	font-size: clamp(1.3rem, 2vw, 2rem);
+	line-height: 1.15;
+}
+
+.wpbm-layout--magazine .wpbm-layout__excerpt {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 3;
+
+	overflow: hidden;
+
+	font-size: 0.95rem;
+	line-height: 1.6;
+	opacity: .85;
+}
+
+/* TABLET */
+
+@media (max-width: 960px) {
+
+	.wpbm-magazine__media {
+		height: 220px;
+		min-height: 220px;
+	}
+
+	.wpbm-magazine__image {
+		flex-basis: 220px;
+		width: 220px;
+		min-width: 220px;
+	}
+
+	.wpbm-magazine__overlay {
+		padding: 1.1rem;
+	}
+
+	.wpbm-layout--magazine .wpbm-layout__title {
+		font-size: 1.2rem;
+	}
+}
+
+/* MOBILE */
+
+@media (max-width: 640px) {
+
+	.wpbm-magazine__media,
+	.wpbm-magazine__story--reverse .wpbm-magazine__media {
+		flex-direction: column;
+
+		height: auto;
+		min-height: auto;
+	}
+
+	.wpbm-magazine__image {
+		width: 100%;
+		min-width: 100%;
+		height: auto;
+
+		aspect-ratio: 1 / 1;
+	}
+
+	.wpbm-magazine__overlay {
+		padding: 1rem;
+	}
+
+	.wpbm-layout--magazine .wpbm-layout__title {
+		font-size: 1.25rem;
+	}
+
+	.wpbm-layout--magazine .wpbm-layout__excerpt {
+		-webkit-line-clamp: 3;
+	}
+}
