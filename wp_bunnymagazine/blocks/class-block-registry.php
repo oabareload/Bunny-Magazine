@@ -185,6 +185,10 @@ final class Block_Registry
 				'value' => Query_Manager::SOURCE_RANDOM_POSTS,
 				'label' => __('Random Posts', 'wp_bunnymagazine'),
 			],
+			[
+				'value' => Query_Manager::SOURCE_WPAM_TOP_POSTS,
+				'label' => __('Affiliate Top Posts', 'wp_bunnymagazine'),
+			],
 		];
 
 		/**
@@ -296,6 +300,11 @@ final class Block_Registry
 				'type'    => 'string',
 				'default' => Query_Manager::SOURCE_LATEST_POSTS,
 			],
+			// New: period selector (only used by wpam_top_posts).
+			'period' => [
+				'type'    => 'string',
+				'default' => 'week',
+			],
 		];
 
 		if (empty($controls['categorySelector'])) {
@@ -340,6 +349,8 @@ final class Block_Registry
 			'authors_exclude'    => Utils::sanitize_author_id_list($attributes['authorsExclude'] ?? []),
 			// New: forward content source to Query_Manager.
 			'contentSource'      => (string) ($attributes['contentSource'] ?? Query_Manager::SOURCE_LATEST_POSTS),
+			// New: forward period (only relevant to wpam_top_posts; ignored by others).
+			'period'             => (string) ($attributes['period'] ?? 'week'),
 		];
 
 		if (!empty($attributes['categoryId'])) {

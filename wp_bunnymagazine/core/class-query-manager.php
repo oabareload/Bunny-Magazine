@@ -76,6 +76,10 @@ final class Query_Manager
 	public const SOURCE_LATEST_POSTS         = 'latest_posts';
 	public const SOURCE_LATEST_UPDATED_POSTS = 'latest_updated_posts';
 	public const SOURCE_RANDOM_POSTS         = 'random_posts';
+	public const SOURCE_WPAM_TOP_POSTS       = 'wpam_top_posts';
+
+	/** @var string[] Valid values for the 'period' config key (wpam_top_posts only). */
+	private const VALID_PERIODS = ['day', 'week', 'month', 'total'];
 
 	/**
 	 * Fetch posts for the given block config / attributes array.
@@ -197,9 +201,30 @@ final class Query_Manager
 			$normalized['authors_exclude'] = [];
 		}
 
+		// 'period' is only meaningful for wpam_top_posts. Keeping it out of the
+		// normalized shape for every other source avoids changing their cache
+		// keys (and therefore avoids invalidating existing cached results).
+		if ($normalized['source'] === self::SOURCE_WPAM_TOP_POSTS) {
+			$normalized['period'] = $this->resolve_period($config);
+		}
+
 		ksort($normalized);
 
 		return $normalized;
+	}
+
+	/**
+	 * Extract and validate the 'period' value for wpam_top_posts.
+	 * Accepts both 'period' (raw) and 'query.period' (nested), mirroring
+	 * the pattern used for 'limit'. Any invalid or missing value falls
+	 * back to 'week'.
+	 */
+	private function resolve_period(array $config): string
+	{
+		$raw = $config['period'] ?? ($config['query']['period'] ?? 'week');
+		$raw = is_string($raw) ? trim($raw) : '';
+
+		return in_array($raw, self::VALID_PERIODS, true) ? $raw : 'week';
 	}
 
 	// -------------------------------------------------------------------------
@@ -217,6 +242,7 @@ final class Query_Manager
 			self::SOURCE_LATEST_POSTS         => new Query_Provider_Latest_Posts(),
 			self::SOURCE_LATEST_UPDATED_POSTS => new Query_Provider_Latest_Updated_Posts(),
 			self::SOURCE_RANDOM_POSTS         => new Query_Provider_Random_Posts(),
+			self::SOURCE_WPAM_TOP_POSTS       => new Query_Provider_Wpam_Top_Posts(),
 		];
 
 		/**

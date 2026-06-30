@@ -200,6 +200,19 @@
 					onChange: function (value) { setAttributes({ contentSource: value }); }
 				}),
 
+				// Period selector (new) — only shown for the Affiliate Top Posts source.
+				attributes.contentSource === 'wpam_top_posts' ? createElement(SelectControl, {
+					label:    i18n.__('Period', 'wp_bunnymagazine'),
+					value:    attributes.period || 'week',
+					options:  [
+						{ label: i18n.__('Today', 'wp_bunnymagazine'),     value: 'day' },
+						{ label: i18n.__('This Week', 'wp_bunnymagazine'), value: 'week' },
+						{ label: i18n.__('This Month', 'wp_bunnymagazine'), value: 'month' },
+						{ label: i18n.__('All Time', 'wp_bunnymagazine'),  value: 'total' }
+					],
+					onChange: function (value) { setAttributes({ period: value }); }
+				}) : null,
+
 				// Post limit (pre-existing).
 				controls.limitControl ? createElement(RangeControl, {
 					label:    i18n.__('Post limit', 'wp_bunnymagazine'),
@@ -335,6 +348,8 @@
 			limit:              { type: 'integer', default: query.limit || 1 },
 			// Content source (new).
 			contentSource:      { type: 'string',  default: 'latest_posts' },
+			// Period (new) — only used by wpam_top_posts.
+			period:             { type: 'string',  default: 'week' },
 			// Filters (pre-existing).
 			categoriesInclude:  { type: 'array', default: [], items: { type: 'integer' } },
 			categoriesExclude:  { type: 'array', default: [], items: { type: 'integer' } },
