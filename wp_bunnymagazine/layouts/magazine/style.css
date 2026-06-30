@@ -2,6 +2,11 @@
 	padding: 0;
 }
 
+.wpbm-layout--magazine a {
+	text-decoration: none;
+	color: inherit;
+}
+
 .wpbm-magazine {
 	display: grid;
 	gap: 1rem;
@@ -65,7 +70,7 @@
 	justify-content: center;
 	align-items: flex-start;
 
-	gap: 0.75rem;
+	gap: 1rem;
 
 	padding: 1.5rem;
 
@@ -74,7 +79,7 @@
 	min-height: auto !important;
 	max-width: none !important;
 
-	background: #111827 !important;
+	background: #0b1220 !important;
 	border: 0 !important;
 	box-shadow: none !important;
 	backdrop-filter: none !important;
@@ -94,8 +99,11 @@
 .wpbm-layout--magazine .wpbm-layout__title {
 	margin: 0;
 
-	font-size: clamp(1.3rem, 2vw, 2rem);
-	line-height: 1.15;
+	font-size: clamp(1.4rem, 2.2vw, 2.1rem);
+	line-height: 1.2;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	color: #ffffff;
 }
 
 .wpbm-layout--magazine .wpbm-layout__excerpt {
@@ -105,9 +113,10 @@
 
 	overflow: hidden;
 
-	font-size: 0.95rem;
-	line-height: 1.6;
-	opacity: .85;
+	font-size: 1rem;
+	line-height: 1.65;
+	opacity: 0.9;
+	color: rgba(255,255,255,0.85);
 }
 
 /* TABLET */

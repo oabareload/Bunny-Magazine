@@ -13,17 +13,32 @@ if (!defined('ABSPATH')) {
  *
  * Responsibilities:
  *  1. Maintain a registry of content source providers (built-in + filtered).
- *  2. Resolve the correct provider from the 'contentSource' / 'source' key,
- *     with a safe fallback to latest_posts for invalid or legacy blocks.
- *  3. Normalize incoming config arrays from blocks/attributes, enforcing
- *     global filter settings server-side (not just hiding UI).
+ *  2. Resolve the correct provider from the canonical 'source' key,
+ *     with a safe fallback to latest_posts for invalid or legacy values.
+ *  3. Normalize the canonical Query Object received from Block_Registry,
+ *     enforcing global filter settings server-side (not just hiding UI).
  *  4. Manage request-level and transient cache (transient skipped for
  *     random_posts — see cache strategy note below).
  *  5. Return WP_Post[] to callers — layouts never touch WP_Query directly.
  *
  * This class remains the ONLY public entry point used by Block_Registry
- * and any other plugin code. Its public method signatures are unchanged
- * from the pre-provider version, so no caller needs to change.
+ * and any other plugin code.
+ *
+ * Single internal contract:
+ *  Query_Manager assumes every config it receives is already the
+ *  canonical Query Object produced by Block_Registry::resolve_query_config().
+ *  That shape is flat and snake_case:
+ *
+ *    source, limit, period,
+ *    categories_include, categories_exclude,
+ *    tags_include, tags_exclude,
+ *    authors_include, authors_exclude
+ *
+ *  Block_Registry is the only caller allowed to read camelCase block
+ *  attributes or fold legacy attributes (like 'categoryId') into this
+ *  shape. Query_Manager never reads camelCase keys, never reads a nested
+ *  'query.*' shape, and never reinterprets the input — it only validates
+ *  and sanitizes the canonical fields it expects.
  *
  * Extensibility:
  *  Third-party modules register new providers via the
@@ -45,7 +60,7 @@ if (!defined('ABSPATH')) {
  *  });
  *
  * Fallback safety:
- *  Any unrecognised or missing 'contentSource' (legacy blocks saved before
+ *  Any unrecognised or missing 'source' (legacy blocks saved before
  *  this system existed, tampered attributes, third-party filters that
  *  return malformed data) always resolves to latest_posts. The system
  *  never throws or returns an empty result purely due to an invalid
@@ -82,9 +97,9 @@ final class Query_Manager
 	private const VALID_PERIODS = ['day', 'week', 'month', 'total'];
 
 	/**
-	 * Fetch posts for the given block config / attributes array.
+	 * Fetch posts for the given canonical Query Object.
 	 *
-	 * @param array $config Raw config from Block_Registry::resolve_query_config().
+	 * @param array $config Canonical Query Object from Block_Registry::resolve_query_config().
 	 * @return \WP_Post[]
 	 */
 	public function fetch(array $config): array
@@ -125,8 +140,9 @@ final class Query_Manager
 	}
 
 	/**
-	 * Normalize a raw config/attributes array into the canonical shape
-	 * expected by providers:
+	 * Normalize the canonical Query Object (produced exclusively by
+	 * Block_Registry::resolve_query_config()) into its final, sanitized
+	 * shape:
 	 * [
 	 *   'source'              => string,
 	 *   'limit'               => int,
@@ -136,49 +152,33 @@ final class Query_Manager
 	 *   'tags_exclude'        => int[],
 	 *   'authors_include'     => int[],
 	 *   'authors_exclude'     => int[],
+	 *   'period'              => string (only present for wpam_top_posts),
 	 * ]
 	 *
-	 * Kept public so external code can build normalized configs directly.
+	 * This method does NOT accept alternate formats (no camelCase keys,
+	 * no nested 'query.*' shape, no legacy 'categoryId'/'category_id').
+	 * It trusts that Block_Registry has already produced the canonical
+	 * shape; it only validates, sanitizes, and enforces global filter
+	 * settings.
 	 *
-	 * @param array $config Raw config.
+	 * Kept public so external code can build normalized configs directly,
+	 * as long as it already supplies the canonical shape.
+	 *
+	 * @param array $config Canonical Query Object.
 	 * @return array Normalized config.
 	 */
 	public function normalize(array $config): array
 	{
-		$limit = isset($config['limit'])
-			? (int) $config['limit']
-			: (int) ($config['query']['limit'] ?? 6);
-
-		$categories_include = $config['categoriesInclude'] ?? ($config['query']['categories_include'] ?? []);
-		$categories_exclude = $config['categoriesExclude'] ?? ($config['query']['categories_exclude'] ?? []);
-		$tags_include       = $config['tagsInclude']       ?? ($config['query']['tags_include'] ?? []);
-		$tags_exclude       = $config['tagsExclude']       ?? ($config['query']['tags_exclude'] ?? []);
-		$authors_include    = $config['authorsInclude']    ?? ($config['query']['authors_include'] ?? []);
-		$authors_exclude    = $config['authorsExclude']    ?? ($config['query']['authors_exclude'] ?? []);
-
 		$normalized = [
 			'source'             => $this->resolve_source_key($config),
-			'limit'              => max(1, $limit),
-			'categories_include' => Utils::sanitize_id_list($categories_include),
-			'categories_exclude' => Utils::sanitize_id_list($categories_exclude),
-			'tags_include'       => Utils::sanitize_id_list($tags_include),
-			'tags_exclude'       => Utils::sanitize_id_list($tags_exclude),
-			'authors_include'    => Utils::sanitize_author_id_list($authors_include),
-			'authors_exclude'    => Utils::sanitize_author_id_list($authors_exclude),
+			'limit'              => max(1, (int) ($config['limit'] ?? 6)),
+			'categories_include' => Utils::sanitize_id_list($config['categories_include'] ?? []),
+			'categories_exclude' => Utils::sanitize_id_list($config['categories_exclude'] ?? []),
+			'tags_include'       => Utils::sanitize_id_list($config['tags_include'] ?? []),
+			'tags_exclude'       => Utils::sanitize_id_list($config['tags_exclude'] ?? []),
+			'authors_include'    => Utils::sanitize_author_id_list($config['authors_include'] ?? []),
+			'authors_exclude'    => Utils::sanitize_author_id_list($config['authors_exclude'] ?? []),
 		];
-
-		// Legacy: single categoryId attribute used by older blocks.
-		if (!empty($config['categoryId'])) {
-			$normalized['categories_include'] = array_values(array_unique(array_merge(
-				$normalized['categories_include'],
-				[(int) $config['categoryId']]
-			)));
-		} elseif (!empty($config['category_id'])) {
-			$normalized['categories_include'] = array_values(array_unique(array_merge(
-				$normalized['categories_include'],
-				[(int) $config['category_id']]
-			)));
-		}
 
 		// Enforce global filter settings server-side. Hiding a filter in the
 		// editor UI is not, on its own, a guarantee it can't reach the query —
@@ -215,13 +215,12 @@ final class Query_Manager
 
 	/**
 	 * Extract and validate the 'period' value for wpam_top_posts.
-	 * Accepts both 'period' (raw) and 'query.period' (nested), mirroring
-	 * the pattern used for 'limit'. Any invalid or missing value falls
-	 * back to 'week'.
+	 * Reads only the canonical top-level 'period' key. Any invalid or
+	 * missing value falls back to 'week'.
 	 */
 	private function resolve_period(array $config): string
 	{
-		$raw = $config['period'] ?? ($config['query']['period'] ?? 'week');
+		$raw = $config['period'] ?? 'week';
 		$raw = is_string($raw) ? trim($raw) : '';
 
 		return in_array($raw, self::VALID_PERIODS, true) ? $raw : 'week';
@@ -276,20 +275,16 @@ final class Query_Manager
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Extract and validate the content source key from a raw config.
+	 * Extract and validate the content source key from the canonical
+	 * Query Object's 'source' field.
 	 *
-	 * Accepts both 'contentSource' (camelCase, used by Block_Registry)
-	 * and 'source' (snake_case, internal) so the system works regardless
-	 * of which layer is calling.
-	 *
-	 * Safe fallback: any value that isn't a string, is empty, doesn't match
-	 * a registered provider key, or is missing entirely (legacy blocks
-	 * saved before contentSource existed) resolves to SOURCE_LATEST_POSTS.
+	 * Safe fallback: any value that isn't a string, is empty, or doesn't
+	 * match a registered provider key resolves to SOURCE_LATEST_POSTS.
 	 * This method never returns an unregistered key.
 	 */
 	private function resolve_source_key(array $config): string
 	{
-		$raw = $config['contentSource'] ?? $config['source'] ?? self::SOURCE_LATEST_POSTS;
+		$raw = $config['source'] ?? self::SOURCE_LATEST_POSTS;
 		$key = is_string($raw) ? trim($raw) : '';
 
 		if ($key === '') {

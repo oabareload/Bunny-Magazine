@@ -319,10 +319,25 @@ final class Block_Registry
 	}
 
 	/**
-	 * Translate block attributes into the normalized config array
-	 * consumed by Query_Manager::fetch().
+	 * Translate raw Gutenberg block attributes (camelCase) into the single
+	 * canonical Query Object consumed by Query_Manager::fetch().
 	 *
-	 * The only addition vs the original is forwarding 'contentSource'.
+	 * Block_Registry is the ONLY place in the plugin allowed to read
+	 * camelCase attribute names. Everything this method returns uses the
+	 * one internal contract, flat and snake_case:
+	 *
+	 *   source, limit, period,
+	 *   categories_include, categories_exclude,
+	 *   tags_include, tags_exclude,
+	 *   authors_include, authors_exclude
+	 *
+	 * Query_Manager never reads block attributes directly and never
+	 * reinterprets this shape — it trusts this method completely.
+	 *
+	 * The legacy single-category attribute ('categoryId') is folded into
+	 * categories_include right here. Query_Manager has no knowledge of
+	 * 'categoryId' at all; that backward-compat concern stays fully
+	 * contained in this one method.
 	 */
 	private static function resolve_query_config(array $layout, array $attributes): array
 	{
@@ -339,24 +354,27 @@ final class Block_Registry
 			$limit = max($min_items, min($max_items, $limit));
 		}
 
-		$query = [
+		// Legacy single-category selector folded into categories_include.
+		// This merge happens here and only here.
+		$categories_include = Utils::sanitize_id_list($attributes['categoriesInclude'] ?? []);
+		if (!empty($attributes['categoryId'])) {
+			$categories_include = array_values(array_unique(array_merge(
+				$categories_include,
+				[(int) $attributes['categoryId']]
+			)));
+			sort($categories_include);
+		}
+
+		return [
+			'source'             => (string) ($attributes['contentSource'] ?? Query_Manager::SOURCE_LATEST_POSTS),
 			'limit'              => $limit,
-			'categories_include' => Utils::sanitize_id_list($attributes['categoriesInclude'] ?? []),
+			'period'             => (string) ($attributes['period'] ?? 'week'),
+			'categories_include' => $categories_include,
 			'categories_exclude' => Utils::sanitize_id_list($attributes['categoriesExclude'] ?? []),
 			'tags_include'       => Utils::sanitize_id_list($attributes['tagsInclude'] ?? []),
 			'tags_exclude'       => Utils::sanitize_id_list($attributes['tagsExclude'] ?? []),
 			'authors_include'    => Utils::sanitize_author_id_list($attributes['authorsInclude'] ?? []),
 			'authors_exclude'    => Utils::sanitize_author_id_list($attributes['authorsExclude'] ?? []),
-			// New: forward content source to Query_Manager.
-			'contentSource'      => (string) ($attributes['contentSource'] ?? Query_Manager::SOURCE_LATEST_POSTS),
-			// New: forward period (only relevant to wpam_top_posts; ignored by others).
-			'period'             => (string) ($attributes['period'] ?? 'week'),
 		];
-
-		if (!empty($attributes['categoryId'])) {
-			$query['category_id'] = (int) $attributes['categoryId'];
-		}
-
-		return $query;
 	}
 }

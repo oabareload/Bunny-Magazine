@@ -87,7 +87,7 @@ $archive_url = $category_id > 0 ? get_category_link($category_id) : '';
 								</h3>
 
 								<div class="wpbm-layout__excerpt">
-									<?php echo esc_html(\BunnyMagazine\Core\trim_excerpt_text($post, 25)); ?>
+									<?php echo esc_html(\BunnyMagazine\Core\trim_excerpt_text($post, 100)); ?>
 								</div>
 
 							</div>

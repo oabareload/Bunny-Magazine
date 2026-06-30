@@ -36,7 +36,7 @@ class Query_Provider_Latest_Posts implements Query_Provider_Interface
 		];
 
 		$tax_query = $this->build_tax_query($config);
-		if (count($tax_query) > 1) {
+		if (!empty($tax_query)) {
 			$args['tax_query'] = $tax_query;
 		}
 
@@ -53,8 +53,9 @@ class Query_Provider_Latest_Posts implements Query_Provider_Interface
 
 	protected function build_tax_query(array $config): array
 	{
-		$tax_query = ['relation' => 'AND'];
+		$tax_query = [];
 
+		// CATEGORIES INCLUDE
 		if (!empty($config['categories_include'])) {
 			$tax_query[] = [
 				'taxonomy' => 'category',
@@ -64,6 +65,7 @@ class Query_Provider_Latest_Posts implements Query_Provider_Interface
 			];
 		}
 
+		// CATEGORIES EXCLUDE
 		if (!empty($config['categories_exclude'])) {
 			$tax_query[] = [
 				'taxonomy' => 'category',
@@ -73,6 +75,7 @@ class Query_Provider_Latest_Posts implements Query_Provider_Interface
 			];
 		}
 
+		// TAGS INCLUDE
 		if (!empty($config['tags_include'])) {
 			$tax_query[] = [
 				'taxonomy' => 'post_tag',
@@ -82,6 +85,7 @@ class Query_Provider_Latest_Posts implements Query_Provider_Interface
 			];
 		}
 
+		// TAGS EXCLUDE
 		if (!empty($config['tags_exclude'])) {
 			$tax_query[] = [
 				'taxonomy' => 'post_tag',
@@ -89,6 +93,11 @@ class Query_Provider_Latest_Posts implements Query_Provider_Interface
 				'terms'    => $config['tags_exclude'],
 				'operator' => 'NOT IN',
 			];
+		}
+
+		// SOLO agregar relation si hay condiciones
+		if (count($tax_query) > 1) {
+			$tax_query['relation'] = 'AND';
 		}
 
 		return $tax_query;

@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 								<div class="wpbm-overlay wpbm-magazine__overlay">
 									<span class="wpbm-layout__eyebrow"><?php echo esc_html(get_the_date('', $post)); ?></span>
 									<h3 class="wpbm-layout__title"><?php echo esc_html(get_the_title($post)); ?></h3>
-									<div class="wpbm-layout__excerpt"><?php echo esc_html(\BunnyMagazine\Core\trim_excerpt_text($post, 28)); ?></div>
+									<div class="wpbm-layout__excerpt"><?php echo esc_html(\BunnyMagazine\Core\trim_excerpt_text($post, 100)); ?></div>
 								</div>
 							</a>
 						</article>

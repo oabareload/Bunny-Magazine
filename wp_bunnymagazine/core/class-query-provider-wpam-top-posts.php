@@ -36,9 +36,15 @@ final class Query_Provider_Wpam_Top_Posts implements Query_Provider_Interface
 			: 'week';
 
 		$args = [
-			'period'    => $period,
-			'limit'     => (int) ($config['limit'] ?? 6),
-			'post_type' => 'post',
+			'period'             => $period,
+			'limit'              => (int) ($config['limit'] ?? 6),
+			'post_type'          => 'post',
+			'categories_include' => $config['categories_include'] ?? [],
+			'categories_exclude' => $config['categories_exclude'] ?? [],
+			'tags_include'       => $config['tags_include']       ?? [],
+			'tags_exclude'       => $config['tags_exclude']       ?? [],
+			'authors_include'    => $config['authors_include']    ?? [],
+			'authors_exclude'    => $config['authors_exclude']    ?? [],
 		];
 
 		$posts = \WP_AffiliateManager\API\WPAM_API::get_top_posts($args);

@@ -161,23 +161,77 @@
 		});
 	}
 
+	// ── toggleableEntityFilter ───────────────────────────────────────────────
+	// Renders ONE MultiEntityControl plus an "Exclude selected" checkbox for
+	// a given Include/Exclude attribute pair. The two attributes themselves
+	// (categoriesInclude/categoriesExclude, tagsInclude/tagsExclude,
+	// authorsInclude/authorsExclude) are unchanged — this only changes how
+	// the editor reads and writes them.
+	//
+	// Read (state derivation, also used when opening pre-existing blocks):
+	//   - excludeMode = excludeIds.length > 0 (Exclude has data → checkbox ON).
+	//   - selectedIds = excludeMode ? excludeIds : includeIds.
+	//   - If both attributes happen to have data (legacy/manual edit),
+	//     Exclude wins for the initial checkbox state.
+	//
+	// Write:
+	//   - Changing the selection writes only to the currently active
+	//     attribute and force-clears the other one, so the two attributes
+	//     can never both hold data after a user interaction.
+	//   - Toggling the checkbox moves the current selection from one
+	//     attribute to the other, so the user's picks aren't lost when
+	//     switching between Include and Exclude.
+	function toggleableEntityFilter(props, config) {
+		var attributes    = props.attributes;
+		var setAttributes = props.setAttributes;
+
+		var includeIds  = attributes[config.includeKey] || [];
+		var excludeIds  = attributes[config.excludeKey] || [];
+		var excludeMode = excludeIds.length > 0;
+		var selectedIds = excludeMode ? excludeIds : includeIds;
+
+		function applySelection(nextIds) {
+			var update = {};
+			update[excludeMode ? config.excludeKey : config.includeKey] = nextIds;
+			// Normalize: the inactive attribute is always cleared whenever
+			// this filter is touched, so Include/Exclude never coexist again.
+			update[excludeMode ? config.includeKey : config.excludeKey] = [];
+			setAttributes(update);
+		}
+
+		function toggleExclude(checked) {
+			var update = {};
+			update[config.includeKey] = checked ? [] : selectedIds;
+			update[config.excludeKey] = checked ? selectedIds : [];
+			setAttributes(update);
+		}
+
+		return createElement(
+			'div', { className: 'wpbm-toggleable-entity-filter' },
+			createElement(MultiEntityControl, {
+				label:         config.label,
+				placeholder:   config.placeholder,
+				entityKind:    config.entityKind,
+				entityName:    config.entityName,
+				selectedIds:   selectedIds,
+				onChange:      applySelection,
+				query:         config.query,
+				selectedQuery: config.selectedQuery,
+				emptyText:     config.emptyText
+			}),
+			createElement(CheckboxControl, {
+				label:    i18n.__('Exclude selected', 'wp_bunnymagazine'),
+				checked:  excludeMode,
+				onChange: toggleExclude
+			})
+		);
+	}
+
 	// ── commonControls ───────────────────────────────────────────────────────
 
 	function commonControls(props, controls) {
 		var attributes    = props.attributes;
 		var setAttributes = props.setAttributes;
-
-		// Category filter IDs.
-		var categoryIds         = attributes.categoriesInclude || [];
-		var excludedCategoryIds = attributes.categoriesExclude || [];
-
-		// Tag filter IDs.
-		var tagIds         = attributes.tagsInclude || [];
-		var excludedTagIds = attributes.tagsExclude || [];
-
-		// Author filter IDs.
-		var authorIds         = attributes.authorsInclude || [];
-		var excludedAuthorIds = attributes.authorsExclude || [];
 
 		// Build Content Source select options from wpbmQueryConfig.
 		var sourceOptions = contentSources.map(function (src) {
@@ -241,77 +295,43 @@
 
 			// ── Panel: Filters ──────────────────────────────────────────────
 			// Rendered only when at least one filter type is enabled in settings.
+			// Each filter type is a single MultiEntityControl plus an "Exclude
+			// selected" checkbox; internally still backed by the same two
+			// Include/Exclude attributes as before (see toggleableEntityFilter).
 			(filtersEnabled.category || filtersEnabled.tag || filtersEnabled.author)
 				? createElement(
 					PanelBody,
 					{ title: i18n.__('Filters', 'wp_bunnymagazine'), initialOpen: false },
 
-					// Category filters — visible only if enabled in settings.
-					filtersEnabled.category ? createElement(MultiEntityControl, {
-						label:       i18n.__('Include categories', 'wp_bunnymagazine'),
+					filtersEnabled.category ? toggleableEntityFilter(props, {
+						label:       i18n.__('Categories', 'wp_bunnymagazine'),
 						placeholder: i18n.__('Search categories', 'wp_bunnymagazine'),
 						entityKind:  'taxonomy',
 						entityName:  'category',
-						selectedIds: categoryIds,
-						onChange:    function (value) { setAttributes({ categoriesInclude: value }); },
+						includeKey:  'categoriesInclude',
+						excludeKey:  'categoriesExclude',
 						query:       { hide_empty: false },
 						emptyText:   i18n.__('No matching categories found.', 'wp_bunnymagazine')
 					}) : null,
 
-					filtersEnabled.category ? createElement(MultiEntityControl, {
-						label:       i18n.__('Exclude categories', 'wp_bunnymagazine'),
-						placeholder: i18n.__('Search categories', 'wp_bunnymagazine'),
-						entityKind:  'taxonomy',
-						entityName:  'category',
-						selectedIds: excludedCategoryIds,
-						onChange:    function (value) { setAttributes({ categoriesExclude: value }); },
-						query:       { hide_empty: false },
-						emptyText:   i18n.__('No matching categories found.', 'wp_bunnymagazine')
-					}) : null,
-
-					// Tag filters — visible only if enabled in settings.
-					filtersEnabled.tag ? createElement(MultiEntityControl, {
-						label:       i18n.__('Include tags', 'wp_bunnymagazine'),
+					filtersEnabled.tag ? toggleableEntityFilter(props, {
+						label:       i18n.__('Tags', 'wp_bunnymagazine'),
 						placeholder: i18n.__('Search tags', 'wp_bunnymagazine'),
 						entityKind:  'taxonomy',
 						entityName:  'post_tag',
-						selectedIds: tagIds,
-						onChange:    function (value) { setAttributes({ tagsInclude: value }); },
+						includeKey:  'tagsInclude',
+						excludeKey:  'tagsExclude',
 						query:       { hide_empty: false },
 						emptyText:   i18n.__('No matching tags found.', 'wp_bunnymagazine')
 					}) : null,
 
-					filtersEnabled.tag ? createElement(MultiEntityControl, {
-						label:       i18n.__('Exclude tags', 'wp_bunnymagazine'),
-						placeholder: i18n.__('Search tags', 'wp_bunnymagazine'),
-						entityKind:  'taxonomy',
-						entityName:  'post_tag',
-						selectedIds: excludedTagIds,
-						onChange:    function (value) { setAttributes({ tagsExclude: value }); },
-						query:       { hide_empty: false },
-						emptyText:   i18n.__('No matching tags found.', 'wp_bunnymagazine')
-					}) : null,
-
-					// Author filters — visible only if enabled in settings (off by default).
-					filtersEnabled.author ? createElement(MultiEntityControl, {
-						label:         i18n.__('Include authors', 'wp_bunnymagazine'),
+					filtersEnabled.author ? toggleableEntityFilter(props, {
+						label:         i18n.__('Authors', 'wp_bunnymagazine'),
 						placeholder:   i18n.__('Search authors', 'wp_bunnymagazine'),
 						entityKind:    'root',
 						entityName:    'user',
-						selectedIds:   authorIds,
-						onChange:      function (value) { setAttributes({ authorsInclude: value }); },
-						query:         { who: 'authors' },
-						selectedQuery: { who: 'authors' },
-						emptyText:     i18n.__('No matching authors found.', 'wp_bunnymagazine')
-					}) : null,
-
-					filtersEnabled.author ? createElement(MultiEntityControl, {
-						label:         i18n.__('Exclude authors', 'wp_bunnymagazine'),
-						placeholder:   i18n.__('Search authors', 'wp_bunnymagazine'),
-						entityKind:    'root',
-						entityName:    'user',
-						selectedIds:   excludedAuthorIds,
-						onChange:      function (value) { setAttributes({ authorsExclude: value }); },
+						includeKey:    'authorsInclude',
+						excludeKey:    'authorsExclude',
 						query:         { who: 'authors' },
 						selectedQuery: { who: 'authors' },
 						emptyText:     i18n.__('No matching authors found.', 'wp_bunnymagazine')

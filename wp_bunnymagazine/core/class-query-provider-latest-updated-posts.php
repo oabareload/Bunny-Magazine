@@ -19,8 +19,16 @@ final class Query_Provider_Latest_Updated_Posts extends Query_Provider_Latest_Po
 	protected function build_args(array $config): array
 	{
 		$args = parent::build_args($config);
+
+		// Cambiamos orden para "updated"
 		$args['orderby'] = 'modified';
 		$args['order']   = 'DESC';
+
+		/**
+		 * IMPORTANTE:
+		 * parent ya incluye tax_query + authors + todo
+		 * así que NO necesitamos reescribir filtros aquí.
+		 */
 
 		return $args;
 	}
