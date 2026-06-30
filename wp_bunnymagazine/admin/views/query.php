@@ -11,6 +11,10 @@
 
 	<form method="post" action="options.php" class="bunny-card">
 		<?php settings_fields('wpbm_settings_group'); ?>
+		<!-- Identifies which field group this form owns, so sanitize_settings()
+		     can tell "checkbox unchecked" (present marker, field absent) apart
+		     from "field not part of this form" (marker absent entirely). -->
+		<input type="hidden" name="wpbm_settings_form" value="query">
 
 		<h2><?php echo esc_html__('Editor Filter Controls', 'wp_bunnymagazine'); ?></h2>
 		<p class="description">

@@ -5,8 +5,15 @@
 	<?php if (isset($_GET['wpbm_notice']) && $_GET['wpbm_notice'] === 'cleared'): ?>
 		<div class="notice notice-success"><p><?php echo esc_html__('Cache cleared.', 'wp_bunnymagazine'); ?></p></div>
 	<?php endif; ?>
+	<?php if (isset($_GET['settings-updated']) && $_GET['settings-updated'] === 'true'): ?>
+		<div class="notice notice-success"><p><?php echo esc_html__('Cache settings saved.', 'wp_bunnymagazine'); ?></p></div>
+	<?php endif; ?>
 	<form method="post" action="options.php" class="bunny-card">
 		<?php settings_fields('wpbm_settings_group'); ?>
+		<!-- Identifies which field group this form owns, so sanitize_settings()
+		     can tell "checkbox unchecked" (present marker, field absent) apart
+		     from "field not part of this form" (marker absent entirely). -->
+		<input type="hidden" name="wpbm_settings_form" value="cache">
 		<table class="form-table" role="presentation">
 			<tr>
 				<th scope="row"><?php echo esc_html__('Enable cache', 'wp_bunnymagazine'); ?></th>
