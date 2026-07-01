@@ -28,7 +28,9 @@
 }
 
 .wpbm-layout--category-showcase .wpbm-layout__eyebrow {
-	display: inline-flex;
+	/* display: inline-flex; */
+	display:none;
+
 	align-items: center;
 	gap: 8px;
 
@@ -40,15 +42,6 @@
 	text-transform: uppercase;
 
 	color: rgba(255,255,255,.80);
-}
-
-.wpbm-layout--category-showcase .wpbm-layout__title {
-	margin: 0;
-	letter-spacing: -.04em;
-}
-
-.wpbm-layout--category-showcase .wpbm-layout__excerpt {
-	margin: 0;
 }
 
 /* =========================
@@ -195,22 +188,27 @@
 ========================= */
 
 .wpbm-layout--category-showcase .wpbm-layout__title {
+	margin: 0;
+	position: absolute;
+    bottom: 6rem;
+
+	letter-spacing: -.04em;
 	color: #fff;
 
-	font-size: clamp(2rem, 4vw, 3.5rem);
+	font-size: clamp(2rem, 4vw, 3rem);
 
 	line-height: 1.05;
 }
 
 .wpbm-layout--category-showcase .wpbm-layout__excerpt {
 	display: -webkit-box;
+	position: absolute;
+	bottom: 1.5rem;
 
 	-webkit-line-clamp: 3;
 	-webkit-box-orient: vertical;
 
 	overflow: hidden;
-
-	max-width: 700px;
 
 	font-size: 1rem;
 	line-height: 1.7;
@@ -234,7 +232,7 @@
 	}
 
 	.wpbm-layout--category-showcase .wpbm-layout__title {
-		font-size: 2.2rem;
+		font-size: 2rem;
 	}
 }
 
