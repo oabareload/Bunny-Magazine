@@ -76,8 +76,8 @@
 	width: 100% !important;
 	max-width: 100% !important;
 
-	height: 650px !important;
-	max-height: 650px !important;
+	height: 500px !important;
+	max-height: 500px !important;
 
 	border-radius: var(--wpbm-radius, 14px);
 
@@ -165,13 +165,29 @@
 .wpbm-showcase__category-label {
 	display: inline-block;
 
-	font-size: .75rem;
+	padding: 0.5rem 0.75rem;
 
-	letter-spacing: .1em;
+	font-size: 1.75rem;
+	font-weight: 600;
+	line-height: 1;
 
+	color: #fff;
 	text-transform: uppercase;
+	letter-spacing: 0.08em;
 
-	color: rgba(255,255,255,.85);
+	background: #fb5fab;
+
+	border-radius: 5px;
+	border: 1px solid #fff;
+	text-align: center;
+
+	box-shadow: 0 1px 3px rgba(0,0,0,.15);
+
+	transition: all .2s ease;
+}
+
+.wpbm-showcase__category-label:hover {
+	transform: translateY(-1px);
 }
 
 /* =========================
@@ -209,8 +225,8 @@
 @media (max-width: 960px) {
 
 	.wpbm-showcase__card {
-		height: 520px !important;
-		max-height: 520px !important;
+		height: 400px !important;
+		max-height: 400px !important;
 	}
 
 	.wpbm-showcase__overlay {
@@ -229,8 +245,8 @@
 @media (max-width: 640px) {
 
 	.wpbm-showcase__card {
-		height: 420px !important;
-		max-height: 420px !important;
+		height: 220px !important;
+		max-height: 220px !important;
 	}
 
 	.wpbm-showcase__overlay {
