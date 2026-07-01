@@ -4,6 +4,7 @@
 
 .wp-block.wp-bunnymagazine-layout a {
 	pointer-events: auto;
+	text-decoration: none;
 }
 
 .wpbm-card {

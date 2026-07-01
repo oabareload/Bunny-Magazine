@@ -22,7 +22,7 @@
 
 	aspect-ratio: auto !important;
 	max-height: none !important;
-	min-height: 280px;
+	min-height: 220px;
 }
 
 /* LAYOUT */
@@ -48,9 +48,9 @@
 	position: relative !important;
 	inset: auto !important;
 
-	flex: 0 0 280px;
-	width: 280px;
-	min-width: 280px;
+	flex: 0 0 420px;
+	width: 420px;
+	min-width: 420px;
 	height: 100%;
 
 	display: block;
@@ -129,9 +129,9 @@
 	}
 
 	.wpbm-magazine__image {
-		flex-basis: 220px;
-		width: 220px;
-		min-width: 220px;
+		flex-basis: 330px;
+		width: 330px;
+		min-width: 330px;
 	}
 
 	.wpbm-magazine__overlay {
