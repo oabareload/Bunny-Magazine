@@ -63,6 +63,8 @@
 			<li><strong><?php echo esc_html__('Latest Posts', 'wp_bunnymagazine'); ?></strong> — <?php echo esc_html__('most recently published posts.', 'wp_bunnymagazine'); ?></li>
 			<li><strong><?php echo esc_html__('Latest Updated Posts', 'wp_bunnymagazine'); ?></strong> — <?php echo esc_html__('most recently modified posts.', 'wp_bunnymagazine'); ?></li>
 			<li><strong><?php echo esc_html__('Random Posts', 'wp_bunnymagazine'); ?></strong> — <?php echo esc_html__('a fresh random selection on every page load (not cached).', 'wp_bunnymagazine'); ?></li>
+			<li><strong><?php echo esc_html__('Affiliate Top Posts', 'wp_bunnymagazine'); ?></strong> — <?php echo esc_html__('most clicked posts reported by WP Affiliate Manager. Supports period filter (Today, This Week, This Month, All Time). Requires WP Affiliate Manager to be active (soft dependency — returns no posts silently if unavailable).', 'wp_bunnymagazine'); ?></li>
+			<li><strong><?php echo esc_html__('Affiliate Top Viewed Posts', 'wp_bunnymagazine'); ?></strong> — <?php echo esc_html__('most viewed posts reported by WP Affiliate Manager. Supports period filter (Today, This Week, This Month, All Time). Requires WP Affiliate Manager to be active (soft dependency — returns no posts silently if unavailable).', 'wp_bunnymagazine'); ?></li>
 		</ul>
 		<p class="description">
 			<?php echo esc_html__('Additional sources (WooCommerce Products, Custom Post Types, Affiliate Products, etc.) can be added by other plugins or custom code via the wpbm_content_sources filter, without modifying BunnyMagazine core files.', 'wp_bunnymagazine'); ?>

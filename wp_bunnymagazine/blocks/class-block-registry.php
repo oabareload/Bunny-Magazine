@@ -189,6 +189,10 @@ final class Block_Registry
 				'value' => Query_Manager::SOURCE_WPAM_TOP_POSTS,
 				'label' => __('Affiliate Top Posts', 'wp_bunnymagazine'),
 			],
+			[
+				'value' => Query_Manager::SOURCE_WPAM_TOP_VIEWED_POSTS,
+				'label' => __('Affiliate Top Viewed Posts', 'wp_bunnymagazine'),
+			],
 		];
 
 		/**

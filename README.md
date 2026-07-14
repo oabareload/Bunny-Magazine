@@ -29,12 +29,13 @@ Each layout is automatically discovered from its own folder and registered witho
 
 Blocks can retrieve content using different built-in sources:
 
-| Source               | Description                                              |
-| --------------------- | --------------------------------------------------------- |
-| Latest Posts          | Most recently published posts                             |
-| Latest Updated Posts  | Recently modified content                                  |
-| Random Posts          | Randomized post selection (not cached, by design)          |
-| Affiliate Top Posts   | Most popular posts reported by WP Affiliate Manager        |
+| Source                     | Description                                                          |
+| --------------------------- | --------------------------------------------------------------------- |
+| Latest Posts               | Most recently published posts                                         |
+| Latest Updated Posts       | Recently modified content                                             |
+| Random Posts               | Randomized post selection (not cached, by design)                     |
+| Affiliate Top Posts        | Most clicked posts reported by WP Affiliate Manager (soft dependency) |
+| Affiliate Top Viewed Posts | Most viewed posts reported by WP Affiliate Manager (soft dependency)  |
 
 The query system is provider-based and can be extended by third-party integrations.
 
@@ -54,7 +55,7 @@ Each block can optionally filter content using:
 * Exclude Authors
 * Post Limit
 * Content Source
-* Period — only shown/applied when Content Source is **Affiliate Top Posts**
+* Period — only shown/applied when Content Source is **Affiliate Top Posts** or **Affiliate Top Viewed Posts**
 
 Filter visibility (category, tag, author) can be controlled globally from the Query Settings screen. A filter that is disabled there is also stripped server-side, so it can never reach a query even from a stale or manually crafted block.
 
@@ -122,6 +123,7 @@ Built-in providers:
 * Latest Updated Posts
 * Random Posts
 * Affiliate Top Posts (soft dependency on WP Affiliate Manager)
+* Affiliate Top Viewed Posts (soft dependency on WP Affiliate Manager)
 
 Additional providers can be registered through the `wpbm_content_sources` filter without modifying any core plugin file.
 
@@ -175,17 +177,18 @@ Bunny-Magazine/
     │   └── class-block-registry.php  # Registers blocks, builds attributes schema, renders blocks
     │
     ├── core/
-    │   ├── class-plugin.php                          # Boot sequence, hooks, cache invalidation events
-    │   ├── class-query-manager.php                   # Central query facade (see Architecture)
-    │   ├── class-query-provider-interface.php         # Contract implemented by all providers
-    │   ├── class-query-provider-latest-posts.php       # Latest Posts provider
-    │   ├── class-query-provider-latest-updated-posts.php # Latest Updated Posts provider
-    │   ├── class-query-provider-random-posts.php       # Random Posts provider
-    │   ├── class-query-provider-wpam-top-posts.php      # Affiliate Top Posts provider (soft dependency)
-    │   ├── class-cache-manager.php                    # Settings storage + cache version/key helpers
-    │   ├── class-layout-registry.php                  # Discovers and registers layouts
-    │   ├── class-layout-engine.php                     # Renders layouts (presentation only)
-    │   ├── class-utils.php                              # Shared sanitization helpers
+    │   ├── class-plugin.php                               # Boot sequence, hooks, cache invalidation events
+    │   ├── class-query-manager.php                        # Central query facade (see Architecture)
+    │   ├── class-query-provider-interface.php              # Contract implemented by all providers
+    │   ├── class-query-provider-latest-posts.php           # Latest Posts provider
+    │   ├── class-query-provider-latest-updated-posts.php   # Latest Updated Posts provider
+    │   ├── class-query-provider-random-posts.php           # Random Posts provider
+    │   ├── class-query-provider-wpam-top-posts.php         # Affiliate Top Posts provider (soft dependency)
+    │   ├── class-query-provider-wpam-top-viewed-posts.php  # Affiliate Top Viewed Posts provider (soft dependency)
+    │   ├── class-cache-manager.php                        # Settings storage + cache version/key helpers
+    │   ├── class-layout-registry.php                      # Discovers and registers layouts
+    │   ├── class-layout-engine.php                        # Renders layouts (presentation only)
+    │   ├── class-utils.php                                # Shared sanitization helpers
     │   └── helpers.php
     │
     └── layouts/
@@ -271,14 +274,22 @@ A randomized post selection. Random results are intentionally **not** written to
 
 Available only when [WP Affiliate Manager](https://wordpress.org/plugins/wp-affiliate-manager/) is active. This is a **soft (optional) dependency**: if WP Affiliate Manager is not installed or active, the source simply returns no posts — no errors, no fatal, and no impact on any other content source.
 
-Surfaces a `Period` selector in the editor, with the following options:
+Surfaces the `Period` selector in the editor:
 
 * Today
 * This Week
 * This Month
 * All Time
 
+Also forwards category, tag, and author filters to `WPAM_API::get_top_posts()` directly — WP Affiliate Manager resolves them internally. Bunny Magazine does not interpret or transform those values.
+
 Bunny Magazine relies only on the standard `WP_Post[]` shape returned by WP Affiliate Manager's API and does not depend on any of its plugin-specific post properties.
+
+### Affiliate Top Viewed Posts
+
+Identical behavior to Affiliate Top Posts, but powered by `WPAM_API::get_top_viewed_posts()`. Surfaces the most viewed posts (by page view count) rather than the most clicked.
+
+Same soft dependency, same Period selector, same filter passthrough. Available only when WP Affiliate Manager is active.
 
 ---
 
@@ -286,12 +297,12 @@ Bunny Magazine relies only on the standard `WP_Post[]` shape returned by WP Affi
 
 Filters and controls available per block:
 
-* **Content Source** — selects which Query Provider supplies the posts (Latest Posts, Latest Updated Posts, Random Posts, Affiliate Top Posts).
+* **Content Source** — selects which Query Provider supplies the posts (Latest Posts, Latest Updated Posts, Random Posts, Affiliate Top Posts, Affiliate Top Viewed Posts).
 * **Post Limit** — number of posts to retrieve, bounded by the layout's configured min/max.
 * **Include Categories / Exclude Categories** — only shown and applied when category filters are enabled in Query Settings.
 * **Include Tags / Exclude Tags** — only shown and applied when tag filters are enabled in Query Settings.
 * **Include Authors / Exclude Authors** — only shown and applied when author filters are enabled in Query Settings (disabled by default).
-* **Period** — only shown when Content Source is set to Affiliate Top Posts; accepts `day`, `week`, `month`, or `total`, defaulting to `week` for any missing or invalid value.
+* **Period** — only shown when Content Source is set to Affiliate Top Posts or Affiliate Top Viewed Posts; accepts `day`, `week`, `month`, or `total`, defaulting to `week` for any missing or invalid value.
 
 Category, tag, and author filter availability is controlled globally from the **Query Settings** admin screen. Disabling a filter type there hides it in the editor **and** strips it server-side from the query, so previously saved blocks cannot bypass it.
 
@@ -314,7 +325,7 @@ Category, tag, and author filter availability is controlled globally from the **
 * **Server Side Render** — every block previews using the same PHP render path used on the front end, so what you see in the editor matches the live output.
 * **Content Sources** — a single selector exposes every registered content source (built-in and third-party) by querying the same provider registry used on the server.
 * **Query Settings awareness** — the Filters panel in the editor only renders the filter controls (category, tag, author) that are currently enabled in Query Settings.
-* **Dynamic controls per source** — additional controls adapt to the selected Content Source; for example, the Period selector (Today / This Week / This Month / All Time) appears only when Affiliate Top Posts is selected, and is hidden for every other source.
+* **Dynamic controls per source** — additional controls adapt to the selected Content Source; for example, the Period selector (Today / This Week / This Month / All Time) appears only when Affiliate Top Posts or Affiliate Top Viewed Posts is selected, and is hidden for every other source.
 
 ---
 
@@ -365,7 +376,7 @@ wp-content/plugins/
 
 5. Configure Content Source, Filters, and Layout settings.
 
-6. (Optional) Install and activate WP Affiliate Manager to enable the Affiliate Top Posts content source.
+6. (Optional) Install and activate WP Affiliate Manager to enable the Affiliate Top Posts and Affiliate Top Viewed Posts content sources.
 
 ---
 

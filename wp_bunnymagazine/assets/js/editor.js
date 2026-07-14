@@ -20,9 +20,11 @@
 	// Shape: { sources: [{value, label}], filtersEnabled: {category, tag, author} }
 	var queryConfig     = window.wpbmQueryConfig || {};
 	var contentSources  = queryConfig.sources || [
-		{ value: 'latest_posts',         label: 'Latest Posts' },
-		{ value: 'latest_updated_posts', label: 'Latest Updated Posts' },
-		{ value: 'random_posts',         label: 'Random Posts' },
+		{ value: 'latest_posts',          label: 'Latest Posts' },
+		{ value: 'latest_updated_posts',  label: 'Latest Updated Posts' },
+		{ value: 'random_posts',          label: 'Random Posts' },
+		{ value: 'wpam_top_posts',        label: 'Affiliate Top Posts' },
+		{ value: 'wpam_top_viewed_posts', label: 'Affiliate Top Viewed Posts' },
 	];
 	var filtersEnabled  = queryConfig.filtersEnabled || { category: true, tag: true, author: false };
 
@@ -254,8 +256,8 @@
 					onChange: function (value) { setAttributes({ contentSource: value }); }
 				}),
 
-				// Period selector (new) — only shown for the Affiliate Top Posts source.
-				attributes.contentSource === 'wpam_top_posts' ? createElement(SelectControl, {
+				// Period selector (new) — only shown for WPAM sources.
+				(attributes.contentSource === 'wpam_top_posts' || attributes.contentSource === 'wpam_top_viewed_posts') ? createElement(SelectControl, {
 					label:    i18n.__('Period', 'wp_bunnymagazine'),
 					value:    attributes.period || 'week',
 					options:  [

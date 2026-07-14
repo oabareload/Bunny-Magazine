@@ -91,7 +91,8 @@ final class Query_Manager
 	public const SOURCE_LATEST_POSTS         = 'latest_posts';
 	public const SOURCE_LATEST_UPDATED_POSTS = 'latest_updated_posts';
 	public const SOURCE_RANDOM_POSTS         = 'random_posts';
-	public const SOURCE_WPAM_TOP_POSTS       = 'wpam_top_posts';
+	public const SOURCE_WPAM_TOP_POSTS         = 'wpam_top_posts';
+	public const SOURCE_WPAM_TOP_VIEWED_POSTS  = 'wpam_top_viewed_posts';
 
 	/** @var string[] Valid values for the 'period' config key (wpam_top_posts only). */
 	private const VALID_PERIODS = ['day', 'week', 'month', 'total'];
@@ -204,7 +205,10 @@ final class Query_Manager
 		// 'period' is only meaningful for wpam_top_posts. Keeping it out of the
 		// normalized shape for every other source avoids changing their cache
 		// keys (and therefore avoids invalidating existing cached results).
-		if ($normalized['source'] === self::SOURCE_WPAM_TOP_POSTS) {
+		if (
+			$normalized['source'] === self::SOURCE_WPAM_TOP_POSTS ||
+			$normalized['source'] === self::SOURCE_WPAM_TOP_VIEWED_POSTS
+		) {
 			$normalized['period'] = $this->resolve_period($config);
 		}
 
@@ -241,7 +245,8 @@ final class Query_Manager
 			self::SOURCE_LATEST_POSTS         => new Query_Provider_Latest_Posts(),
 			self::SOURCE_LATEST_UPDATED_POSTS => new Query_Provider_Latest_Updated_Posts(),
 			self::SOURCE_RANDOM_POSTS         => new Query_Provider_Random_Posts(),
-			self::SOURCE_WPAM_TOP_POSTS       => new Query_Provider_Wpam_Top_Posts(),
+			self::SOURCE_WPAM_TOP_POSTS        => new Query_Provider_Wpam_Top_Posts(),
+			self::SOURCE_WPAM_TOP_VIEWED_POSTS => new Query_Provider_Wpam_Top_Viewed_Posts(),
 		];
 
 		/**
