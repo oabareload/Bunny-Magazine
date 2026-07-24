@@ -21,6 +21,10 @@ Included layouts:
 * Mosaic
 * Category Showcase
 
+Included static components:
+
+* Profile Card
+
 Each layout is automatically discovered from its own folder and registered without hardcoded definitions.
 
 ---
@@ -103,6 +107,8 @@ Render Template
 ### Block Registry
 
 Registers every Gutenberg block discovered by the Layout Registry, exposes block attributes (content source, filters, period, layout-specific controls), and resolves block attributes into the normalized config consumed by the Query Manager.
+
+Layouts with `"type": "static"` in their `layout.json` are registered as fully static blocks. They skip the Query Manager entirely — no `WP_Query` is executed and no content source is exposed. Their attributes are passed directly to `render.php`.
 
 ### Query Manager
 
@@ -194,38 +200,55 @@ Bunny-Magazine/
     │   ├── class-utils.php                                # Shared sanitization helpers
     │   └── helpers.php
     │
-    └── layouts/
-        ├── hero/
-        │   ├── layout.json
-        │   ├── render.php
-        │   ├── style.css
-        │   └── editor.css
-        ├── carousel/
-        │   ├── layout.json
-        │   ├── render.php
-        │   ├── style.css
-        │   ├── editor.css
-        │   └── carousel.js
-        ├── magazine/
-        │   ├── layout.json
-        │   ├── render.php
-        │   ├── style.css
-        │   └── editor.css
-        ├── grid/
-        │   ├── layout.json
-        │   ├── render.php
-        │   ├── style.css
-        │   └── editor.css
-        ├── mosaic/
-        │   ├── layout.json
-        │   ├── render.php
-        │   ├── style.css
-        │   └── editor.css
-        └── category-showcase/
-            ├── layout.json
-            ├── render.php
-            ├── style.css
-            └── editor.css
+    ├── layouts/
+    │   ├── hero/
+    │   │   ├── layout.json
+    │   │   ├── render.php
+    │   │   ├── style.css
+    │   │   └── editor.css
+    │   ├── carousel/
+    │   │   ├── layout.json
+    │   │   ├── render.php
+    │   │   ├── style.css
+    │   │   ├── editor.css
+    │   │   └── carousel.js
+    │   ├── magazine/
+    │   │   ├── layout.json
+    │   │   ├── render.php
+    │   │   ├── style.css
+    │   │   └── editor.css
+    │   ├── grid/
+    │   │   ├── layout.json
+    │   │   ├── render.php
+    │   │   ├── style.css
+    │   │   └── editor.css
+    │   ├── mosaic/
+    │   │   ├── layout.json
+    │   │   ├── render.php
+    │   │   ├── style.css
+    │   │   └── editor.css
+    │   ├── category-showcase/
+    │   │   ├── layout.json
+    │   │   ├── render.php
+    │   │   ├── style.css
+    │   │   └── editor.css
+    │   └── social-profile/           # Static component (no WP_Query)
+    │       ├── layout.json
+    │       ├── render.php
+    │       ├── style.css
+    │       └── editor.css
+    └── core/
+        └── icons/                    # Internal SVG icon library
+            ├── instagram.php
+            ├── facebook.php
+            ├── youtube.php
+            ├── tiktok.php
+            ├── x.php
+            ├── discord.php
+            ├── patreon.php
+            ├── kofi.php
+            ├── website.php
+            └── generic.php
 ```
 
 > Note: `languages/` is referenced by the plugin's text domain loader but is created on demand when translation files are added; it is not part of the current repository contents.
@@ -250,12 +273,88 @@ Defines:
 
 * Block title
 * Description
-* Query defaults
+* Query defaults (query-driven layouts only)
 * Available controls
 * Assets
 * Layout schema
+* `"type": "static"` — marks a layout as static, bypassing all query logic
 
 The registry automatically discovers layouts from these files.
+
+---
+
+## Profile Card
+
+Profile Card is a **static** Gutenberg block for displaying social media profiles, creator pages, sponsor links, and partner accounts. It performs no HTTP requests, executes no `WP_Query`, and loads no JavaScript on the frontend. All content is configured directly inside the Gutenberg editor.
+
+### Configurable Attributes
+
+| Attribute | Type | Default | Description |
+|---|---|---|---|
+| `profileType` | `string` | `instagram` | Network / platform icon to display |
+| `name` | `string` | `BunnyChase` | Display name shown on the card |
+| `showName` | `boolean` | `true` | Toggle visibility of the name |
+| `username` | `string` | `@bunnychase.net` | Handle or username line |
+| `showUsername` | `boolean` | `true` | Toggle visibility of the username |
+| `description` | `string` | — | Short bio or call to action text |
+| `showDescription` | `boolean` | `true` | Toggle visibility of the description |
+| `url` | `string` | — | Profile URL (required to render the button) |
+| `openInNewTab` | `boolean` | `true` | Open URL in a new tab |
+| `showButton` | `boolean` | `true` | Toggle the follow/visit button |
+| `buttonText` | `string` | `Seguir en Instagram` | Button label |
+| `styleVariant` | `string` | `brand` | Color mode: `brand` or `theme` |
+| `alignment` | `string` | `left` | Card alignment: `left`, `center`, or `right` |
+| `placeholderType` | `string` | `none` | Decorative visual element: `none`, `grid`, or `image` |
+| `placeholderGridSize` | `string` | `2x3` | Grid dimensions (grid mode only): `2x2`, `2x3`, `3x3`, `3x4`, or `4x4` |
+| `placeholderPosition` | `string` | `after_description` | Element position: `before_description` or `after_description` |
+| `placeholderImage` | `string` | `""` | URL of an image from the WordPress Media Library (image mode only) |
+
+### Style Variants
+
+**`brand` (default)**
+
+Uses the official brand color of the selected network. The icon, button background, and button hover state all reflect the platform's identity color.
+
+**`theme`**
+
+Ignores brand colors entirely. The icon renders using `currentColor` and the button inherits the global site styles. Use this when the card must blend seamlessly with the site's design system.
+
+### Supported Platforms
+
+| Value | Platform |
+|---|---|
+| `instagram` | Instagram |
+| `facebook` | Facebook |
+| `youtube` | YouTube |
+| `tiktok` | TikTok |
+| `x` | X (Twitter) |
+| `discord` | Discord |
+| `patreon` | Patreon |
+| `kofi` | Ko-fi |
+| `website` | Website / Blog |
+| `custom` | Custom (generic globe icon) |
+
+Icons are self-contained SVG files stored in `core/icons/`. No external icon library is loaded.
+
+### Placeholder Visual Element
+
+An optional decorative element placed around the card content according to `placeholderPosition` (`before_description` or `after_description`). Three modes are available:
+
+**`none`** — No decorative element is rendered (default).
+
+**`grid`** — A pure CSS grid of square placeholder cells, sized by `placeholderGridSize` (`2x2`, `2x3`, `3x3`, `3x4`, `3x5`). The container is marked `aria-hidden="true"` and is invisible to screen readers.
+
+**`image`** — An image selected from the WordPress Media Library via the native `MediaUpload` / `MediaUploadCheck` Gutenberg controls. Rendered as `<img loading="lazy" decoding="async" alt="">` inside an `aria-hidden="true"` wrapper. Uses `aspect-ratio: 16/9` and `object-fit: cover` to prevent CLS.
+
+### Button Behavior
+
+The button is **only rendered** when both `showButton` is `true` **and** `url` is non-empty. A button with no destination is never output, regardless of the saved attribute state.
+
+### Frontend Footprint
+
+* **0 HTTP requests** — all content is static.
+* **0 JavaScript** — no scripts are loaded on the frontend.
+* **1 CSS file** — scoped stylesheet via `wp_enqueue_style`.
 
 ---
 
@@ -429,6 +528,7 @@ add_filter(
 * Keep layouts presentation-only.
 * Keep queries inside Query Manager and Providers.
 * Avoid direct WP_Query usage inside layouts.
+* Use `"type": "static"` in `layout.json` for components that do not require a content query.
 * Prefer WordPress APIs over custom abstractions.
 * Avoid jQuery.
 * Load assets only when required.
@@ -441,7 +541,7 @@ add_filter(
 * Editorial layout system
 * Dynamic Gutenberg blocks
 * Server-side rendered
-* Query-driven
+* Query-driven and static layouts
 * Cache-aware
 * Extensible
 

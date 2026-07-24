@@ -65,9 +65,26 @@ function build_term_label(string $taxonomy, array $ids): string
 	return implode(', ', $names);
 }
 
+function get_social_icon_svg(string $profile_type = 'instagram'): string
+{
+	$clean_type = sanitize_key($profile_type);
+	$icon_file  = WPMB_PATH . 'core/icons/' . $clean_type . '.php';
+
+	if (!is_readable($icon_file)) {
+		$icon_file = WPMB_PATH . 'core/icons/generic.php';
+	}
+
+	if (is_readable($icon_file)) {
+		return (string) include $icon_file;
+	}
+
+	return '';
+}
+
 function wpbm_uninstall_cleanup(): void
 {
 	delete_option('wpbm_settings');
 	delete_option('wpbm_cache_version');
 	delete_option('wpbm_layout_manifest');
 }
+

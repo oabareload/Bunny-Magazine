@@ -1,0 +1,9 @@
+/* Bunny Magazine - Profile Card (Social Profile) Editor Styles */
+
+.wpbm-editor-block .wpbm-social-profile {
+	max-width: 100%;
+}
+
+.wpbm-social-profile__button {
+	pointer-events: none;
+}

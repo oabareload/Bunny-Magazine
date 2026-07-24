@@ -69,6 +69,8 @@ final class Layout_Registry
 				'slug' => $slug,
 				'title' => (string) ($layout['title'] ?? $slug),
 				'description' => (string) ($layout['description'] ?? ''),
+				'type' => (string) ($layout['type'] ?? 'query'),
+				'attributes' => is_array($layout['attributes'] ?? null) ? $layout['attributes'] : [],
 				'block' => [
 					'title' => (string) ($block['title'] ?? $layout['title'] ?? $slug),
 					'description' => (string) ($block['description'] ?? ($layout['description'] ?? '')),

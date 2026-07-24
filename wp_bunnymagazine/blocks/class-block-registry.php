@@ -128,12 +128,18 @@ final class Block_Registry
 		}
 
 		$layout = Layout_Registry::get($layout_slug);
-		if (!$layout || self::$query_manager === null || self::$layout_engine === null) {
+		if (!$layout || self::$layout_engine === null) {
 			return '';
 		}
 
-		$query_config = self::resolve_query_config($layout, $attributes);
-		$posts        = self::$query_manager->fetch($query_config);
+		$posts = [];
+		if (($layout['type'] ?? 'query') !== 'static') {
+			if (self::$query_manager === null) {
+				return '';
+			}
+			$query_config = self::resolve_query_config($layout, $attributes);
+			$posts        = self::$query_manager->fetch($query_config);
+		}
 
 		if (wp_style_is('wpbm-layout-' . $layout_slug, 'registered')) {
 			wp_enqueue_style('wpbm-layout-' . $layout_slug);
@@ -247,10 +253,22 @@ final class Block_Registry
 
 	/**
 	 * Build the Gutenberg block attributes schema.
-	 * Adds contentSource (new) alongside all pre-existing attributes.
+	 *
+	 * For static layouts (type: "static") only the layout-specific attributes
+	 * declared in layout.json are returned — all query-related attributes
+	 * (contentSource, period, limit, filters…) are intentionally omitted so
+	 * the schema matches exactly what editor.js sends for static blocks.
+	 *
+	 * For query-driven layouts, the full query schema is returned and the
+	 * layout-specific attributes are merged on top.
 	 */
 	private static function attributes_schema(array $layout): array
 	{
+		// Static layouts: return only layout-declared attributes.
+		if (($layout['type'] ?? 'query') === 'static') {
+			return is_array($layout['attributes'] ?? null) ? $layout['attributes'] : [];
+		}
+
 		$block          = is_array($layout['block'] ?? null) ? $layout['block'] : [];
 		$query_defaults = is_array($block['query'] ?? null) ? $block['query'] : [];
 		$controls       = is_array($block['controls'] ?? null) ? $block['controls'] : [];
@@ -321,6 +339,10 @@ final class Block_Registry
 
 		if (empty($controls['sectionTitle'])) {
 			$schema['sectionTitle']['default'] = '';
+		}
+
+		if (isset($layout['attributes']) && is_array($layout['attributes'])) {
+			$schema = array_merge($schema, $layout['attributes']);
 		}
 
 		return $schema;

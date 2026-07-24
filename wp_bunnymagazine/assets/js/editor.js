@@ -1,23 +1,27 @@
 (function (blocks, element, components, blockEditor, serverSideRender, data, i18n) {
 	'use strict';
 
-	var createElement  = element.createElement;
-	var useState       = element.useState;
-	var useSelect      = data.useSelect;
+	var createElement    = element.createElement;
+	var useState         = element.useState;
+	var useSelect        = data.useSelect;
 	var InspectorControls = blockEditor.InspectorControls;
 	var useBlockProps     = blockEditor.useBlockProps;
 	var ServerSideRender  = serverSideRender;
-	var PanelBody      = components.PanelBody;
-	var TextControl    = components.TextControl;
-	var RangeControl   = components.RangeControl;
-	var SelectControl  = components.SelectControl;
-	var SearchControl  = components.SearchControl;
-	var CheckboxControl = components.CheckboxControl;
-	var Button         = components.Button;
-	var ComboboxControl = components.ComboboxControl;
+	var PanelBody        = components.PanelBody;
+	var TextControl      = components.TextControl;
+	var TextareaControl  = components.TextareaControl || components.TextControl;
+	var ToggleControl    = components.ToggleControl || components.CheckboxControl;
+	var RangeControl     = components.RangeControl;
+	var SelectControl    = components.SelectControl;
+	var SearchControl    = components.SearchControl;
+	var CheckboxControl  = components.CheckboxControl;
+	var Button           = components.Button;
+	var ComboboxControl  = components.ComboboxControl;
+	var URLInput         = (blockEditor && blockEditor.URLInput) ? blockEditor.URLInput : components.TextControl;
+	var MediaUpload      = blockEditor.MediaUpload;
+	var MediaUploadCheck = blockEditor.MediaUploadCheck;
 
 	// ── wpbmQueryConfig (injected by Block_Registry via wp_localize_script) ──
-	// Shape: { sources: [{value, label}], filtersEnabled: {category, tag, author} }
 	var queryConfig     = window.wpbmQueryConfig || {};
 	var contentSources  = queryConfig.sources || [
 		{ value: 'latest_posts',           label: 'Latest Posts' },
@@ -49,13 +53,13 @@
 	// ── MultiEntityControl ───────────────────────────────────────────────────
 
 	function MultiEntityControl(props) {
-		var selectedIds    = props.selectedIds || [];
-		var selectedKey    = selectedIds.join(',');
-		var queryKey       = JSON.stringify(props.query || {});
+		var selectedIds      = props.selectedIds || [];
+		var selectedKey      = selectedIds.join(',');
+		var queryKey         = JSON.stringify(props.query || {});
 		var selectedQueryKey = JSON.stringify(props.selectedQuery || {});
-		var _s             = useState('');
-		var search         = _s[0];
-		var setSearch      = _s[1];
+		var _s               = useState('');
+		var search           = _s[0];
+		var setSearch        = _s[1];
 
 		var records = useSelect(function (select) {
 			var q = Object.assign({ per_page: 20, hide_empty: false }, props.query || {});
@@ -127,11 +131,11 @@
 	// ── SingleEntityControl ──────────────────────────────────────────────────
 
 	function SingleEntityControl(props) {
-		var _s2          = useState('');
-		var search       = _s2[0];
-		var setSearch    = _s2[1];
+		var _s2           = useState('');
+		var search        = _s2[0];
+		var setSearch     = _s2[1];
 		var selectedValue = parseInt(props.value, 10) || 0;
-		var queryKey     = JSON.stringify(props.query || {});
+		var queryKey      = JSON.stringify(props.query || {});
 
 		var records = useSelect(function (select) {
 			var q = Object.assign({ per_page: 20, hide_empty: false }, props.query || {});
@@ -165,25 +169,7 @@
 	}
 
 	// ── toggleableEntityFilter ───────────────────────────────────────────────
-	// Renders ONE MultiEntityControl plus an "Exclude selected" checkbox for
-	// a given Include/Exclude attribute pair. The two attributes themselves
-	// (categoriesInclude/categoriesExclude, tagsInclude/tagsExclude,
-	// authorsInclude/authorsExclude) are unchanged — this only changes how
-	// the editor reads and writes them.
-	//
-	// Read (state derivation, also used when opening pre-existing blocks):
-	//   - excludeMode = excludeIds.length > 0 (Exclude has data → checkbox ON).
-	//   - selectedIds = excludeMode ? excludeIds : includeIds.
-	//   - If both attributes happen to have data (legacy/manual edit),
-	//     Exclude wins for the initial checkbox state.
-	//
-	// Write:
-	//   - Changing the selection writes only to the currently active
-	//     attribute and force-clears the other one, so the two attributes
-	//     can never both hold data after a user interaction.
-	//   - Toggling the checkbox moves the current selection from one
-	//     attribute to the other, so the user's picks aren't lost when
-	//     switching between Include and Exclude.
+
 	function toggleableEntityFilter(props, config) {
 		var attributes    = props.attributes;
 		var setAttributes = props.setAttributes;
@@ -196,8 +182,6 @@
 		function applySelection(nextIds) {
 			var update = {};
 			update[excludeMode ? config.excludeKey : config.includeKey] = nextIds;
-			// Normalize: the inactive attribute is always cleared whenever
-			// this filter is touched, so Include/Exclude never coexist again.
 			update[excludeMode ? config.includeKey : config.excludeKey] = [];
 			setAttributes(update);
 		}
@@ -230,13 +214,12 @@
 		);
 	}
 
-	// ── commonControls ───────────────────────────────────────────────────────
+	// ── commonControls (for post-query layouts) ──────────────────────────────
 
 	function commonControls(props, controls) {
 		var attributes    = props.attributes;
 		var setAttributes = props.setAttributes;
 
-		// Build Content Source select options from wpbmQueryConfig.
 		var sourceOptions = contentSources.map(function (src) {
 			return { label: src.label, value: src.value };
 		});
@@ -244,12 +227,10 @@
 		return createElement(
 			InspectorControls, null,
 
-			// ── Panel: Content ──────────────────────────────────────────────
 			createElement(
 				PanelBody,
 				{ title: i18n.__('Content', 'wp_bunnymagazine'), initialOpen: true },
 
-				// Content Source selector (new).
 				createElement(SelectControl, {
 					label:    i18n.__('Content source', 'wp_bunnymagazine'),
 					value:    attributes.contentSource || 'latest_posts',
@@ -257,7 +238,6 @@
 					onChange: function (value) { setAttributes({ contentSource: value }); }
 				}),
 
-				// Period selector (new) — only shown for WPAM sources.
 				(attributes.contentSource === 'wpam_top_posts' || attributes.contentSource === 'wpam_top_viewed_posts' || attributes.contentSource === 'wpam_top_scored_posts') ? createElement(SelectControl, {
 					label:    i18n.__('Period', 'wp_bunnymagazine'),
 					value:    attributes.period || 'week',
@@ -270,7 +250,6 @@
 					onChange: function (value) { setAttributes({ period: value }); }
 				}) : null,
 
-				// Post limit (pre-existing).
 				controls.limitControl ? createElement(RangeControl, {
 					label:    i18n.__('Post limit', 'wp_bunnymagazine'),
 					value:    attributes.limit,
@@ -283,7 +262,6 @@
 					}
 				}) : null,
 
-				// Single category selector (pre-existing, only if layout declares it).
 				controls.categorySelector ? createElement(SingleEntityControl, {
 					label:       i18n.__('Category', 'wp_bunnymagazine'),
 					placeholder: i18n.__('Search categories', 'wp_bunnymagazine'),
@@ -296,11 +274,6 @@
 				}) : null
 			),
 
-			// ── Panel: Filters ──────────────────────────────────────────────
-			// Rendered only when at least one filter type is enabled in settings.
-			// Each filter type is a single MultiEntityControl plus an "Exclude
-			// selected" checkbox; internally still backed by the same two
-			// Include/Exclude attributes as before (see toggleableEntityFilter).
 			(filtersEnabled.category || filtersEnabled.tag || filtersEnabled.author)
 				? createElement(
 					PanelBody,
@@ -342,7 +315,6 @@
 				)
 				: null,
 
-			// ── Panel: Layout ───────────────────────────────────────────────
 			createElement(
 				PanelBody,
 				{ title: i18n.__('Layout', 'wp_bunnymagazine'), initialOpen: false },
@@ -360,20 +332,263 @@
 		);
 	}
 
+	// ── socialProfileControls (for Profile Card static component) ───────────
+
+	function socialProfileControls(props) {
+		var attributes    = props.attributes;
+		var setAttributes = props.setAttributes;
+
+		var defaultButtonLabels = {
+			instagram: 'Seguir en Instagram',
+			facebook:  'Seguir en Facebook',
+			youtube:   'Ver canal de YouTube',
+			tiktok:    'Seguir en TikTok',
+			x:         'Seguir en X',
+			discord:   'Unirse a Discord',
+			patreon:   'Apoyar en Patreon',
+			kofi:      'Invitar un Ko-fi',
+			website:   'Visitar sitio web',
+			generic:   'Ver perfil'
+		};
+
+		function handleProfileTypeChange(newType) {
+			var update = { profileType: newType };
+			var currentLabel = attributes.buttonText || '';
+			var isDefault = !currentLabel || Object.values(defaultButtonLabels).indexOf(currentLabel) !== -1;
+			if (isDefault && defaultButtonLabels[newType]) {
+				update.buttonText = defaultButtonLabels[newType];
+			}
+			setAttributes(update);
+		}
+
+		return createElement(
+			InspectorControls, null,
+
+			// Panel: Perfil
+			createElement(
+				PanelBody,
+				{ title: i18n.__('Configuración del Perfil', 'wp_bunnymagazine'), initialOpen: true },
+
+				createElement(SelectControl, {
+					label:    i18n.__('Icono / Tipo de Perfil', 'wp_bunnymagazine'),
+					value:    attributes.profileType || 'instagram',
+					options:  [
+						{ label: 'Instagram', value: 'instagram' },
+						{ label: 'Facebook',  value: 'facebook' },
+						{ label: 'YouTube',   value: 'youtube' },
+						{ label: 'TikTok',    value: 'tiktok' },
+						{ label: 'X',         value: 'x' },
+						{ label: 'Discord',   value: 'discord' },
+						{ label: 'Patreon',   value: 'patreon' },
+						{ label: 'Ko-fi',     value: 'kofi' },
+						{ label: 'Sitio Web', value: 'website' },
+						{ label: 'Genérico',  value: 'generic' }
+					],
+					onChange: handleProfileTypeChange
+				}),
+
+				createElement(TextControl, {
+					label:    i18n.__('Nombre', 'wp_bunnymagazine'),
+					value:    attributes.name || '',
+					onChange: function (val) { setAttributes({ name: val }); }
+				}),
+
+				createElement(ToggleControl, {
+					label:    i18n.__('Mostrar nombre', 'wp_bunnymagazine'),
+					checked:  attributes.showName !== false,
+					onChange: function (val) { setAttributes({ showName: val }); }
+				}),
+
+				createElement(TextControl, {
+					label:    i18n.__('Usuario / ID', 'wp_bunnymagazine'),
+					value:    attributes.username || '',
+					onChange: function (val) { setAttributes({ username: val }); }
+				}),
+
+				createElement(ToggleControl, {
+					label:    i18n.__('Mostrar usuario', 'wp_bunnymagazine'),
+					checked:  attributes.showUsername !== false,
+					onChange: function (val) { setAttributes({ showUsername: val }); }
+				}),
+
+				createElement(TextareaControl, {
+					label:    i18n.__('Descripción', 'wp_bunnymagazine'),
+					value:    attributes.description || '',
+					onChange: function (val) { setAttributes({ description: val }); }
+				}),
+
+				createElement(ToggleControl, {
+					label:    i18n.__('Mostrar descripción', 'wp_bunnymagazine'),
+					checked:  attributes.showDescription !== false,
+					onChange: function (val) { setAttributes({ showDescription: val }); }
+				})
+			),
+
+			// Panel: Estilo y Alineación
+			createElement(
+				PanelBody,
+				{ title: i18n.__('Estilo y Alineación', 'wp_bunnymagazine'), initialOpen: false },
+
+				createElement(SelectControl, {
+					label:    i18n.__('Modo de Estilo', 'wp_bunnymagazine'),
+					value:    attributes.styleVariant || 'brand',
+					options:  [
+						{ label: i18n.__('Colores Oficiales (Brand)', 'wp_bunnymagazine'), value: 'brand' },
+						{ label: i18n.__('Estilo del Tema (Theme)', 'wp_bunnymagazine'),   value: 'theme' }
+					],
+					onChange: function (val) { setAttributes({ styleVariant: val }); }
+				}),
+
+				createElement(SelectControl, {
+					label:    i18n.__('Alineación', 'wp_bunnymagazine'),
+					value:    attributes.alignment || 'left',
+					options:  [
+						{ label: i18n.__('Izquierda', 'wp_bunnymagazine'), value: 'left' },
+						{ label: i18n.__('Centro', 'wp_bunnymagazine'),    value: 'center' }
+					],
+					onChange: function (val) { setAttributes({ alignment: val }); }
+				})
+			),
+
+			// Panel: Publicaciones / Placeholder
+			createElement(
+				PanelBody,
+				{ title: i18n.__('Publicaciones / Placeholder', 'wp_bunnymagazine'), initialOpen: false },
+
+				createElement(SelectControl, {
+					label:    i18n.__('Tipo de Placeholder', 'wp_bunnymagazine'),
+					value:    attributes.placeholderType || 'none',
+					options:  [
+						{ label: i18n.__('Ninguno', 'wp_bunnymagazine'), value: 'none' },
+						{ label: i18n.__('Grid', 'wp_bunnymagazine'),    value: 'grid' },
+						{ label: i18n.__('Imagen', 'wp_bunnymagazine'),  value: 'image' }
+					],
+					onChange: function (val) { setAttributes({ placeholderType: val }); }
+				}),
+
+				(attributes.placeholderType === 'grid') ? createElement(SelectControl, {
+					label:    i18n.__('Tamaño de Cuadrícula', 'wp_bunnymagazine'),
+					value:    attributes.placeholderGridSize || '2x3',
+					options:  [
+						{ label: '2 × 2 (4 publicaciones)',  value: '2x2' },
+						{ label: '2 × 3 (6 publicaciones)',  value: '2x3' },
+						{ label: '3 × 3 (9 publicaciones)',  value: '3x3' },
+						{ label: '3 × 4 (12 publicaciones)', value: '3x4' },
+						{ label: '3 × 5 (15 publicaciones)', value: '3x5' }
+					],
+					onChange: function (val) { setAttributes({ placeholderGridSize: val }); }
+				}) : null,
+
+				(attributes.placeholderType === 'grid') ? createElement(SelectControl, {
+					label:    i18n.__('Posición del Placeholder', 'wp_bunnymagazine'),
+					value:    attributes.placeholderPosition || 'after_description',
+					options:  [
+						{ label: i18n.__('Arriba (antes de la descripción)', 'wp_bunnymagazine'), value: 'before_description' },
+						{ label: i18n.__('Abajo (después de la descripción)', 'wp_bunnymagazine'), value: 'after_description' }
+					],
+					onChange: function (val) { setAttributes({ placeholderPosition: val }); }
+				}) : null,
+
+				// ── Image mode ─────────────────────────────────────────────
+				(attributes.placeholderType === 'image') ? createElement(SelectControl, {
+					label:    i18n.__('Posición de la Imagen', 'wp_bunnymagazine'),
+					value:    attributes.placeholderPosition || 'after_description',
+					options:  [
+						{ label: i18n.__('Arriba (antes de la descripción)', 'wp_bunnymagazine'), value: 'before_description' },
+						{ label: i18n.__('Abajo (después de la descripción)', 'wp_bunnymagazine'), value: 'after_description' }
+					],
+					onChange: function (val) { setAttributes({ placeholderPosition: val }); }
+				}) : null,
+
+				(attributes.placeholderType === 'image') ? createElement(
+					MediaUploadCheck, null,
+					createElement(
+						MediaUpload,
+						{
+							onSelect: function (media) { setAttributes({ placeholderImage: media.url }); },
+							allowedTypes: ['image'],
+							value:    attributes.placeholderImage || '',
+							render: function (ref) {
+								var open = ref.open;
+								return createElement(
+									'div', { className: 'wpbm-media-upload-wrap' },
+									attributes.placeholderImage
+										? createElement(
+											'div', { className: 'wpbm-media-preview' },
+											createElement('img', {
+												src:   attributes.placeholderImage,
+												alt:   '',
+												style: { width: '100%', height: '80px', objectFit: 'cover', borderRadius: '6px', marginBottom: '8px', display: 'block' }
+											}),
+											createElement(Button, { variant: 'secondary', isSmall: true, onClick: open }, i18n.__('Reemplazar imagen', 'wp_bunnymagazine')),
+											createElement('span', { style: { margin: '0 6px' } }, ''),
+											createElement(Button, { variant: 'tertiary', isSmall: true, isDestructive: true, onClick: function () { setAttributes({ placeholderImage: '' }); } }, i18n.__('Eliminar', 'wp_bunnymagazine'))
+										)
+										: createElement(Button, { variant: 'secondary', onClick: open }, i18n.__('Seleccionar imagen', 'wp_bunnymagazine'))
+								);
+							}
+						}
+					)
+				) : null
+			),
+
+			// Panel: Botón y Enlace
+			createElement(
+				PanelBody,
+				{ title: i18n.__('Botón y Enlace', 'wp_bunnymagazine'), initialOpen: false },
+
+				createElement(ToggleControl, {
+					label:    i18n.__('Mostrar botón', 'wp_bunnymagazine'),
+					checked:  attributes.showButton !== false,
+					onChange: function (val) { setAttributes({ showButton: val }); }
+				}),
+
+				attributes.showButton !== false ? createElement(TextControl, {
+					label:    i18n.__('Texto del botón', 'wp_bunnymagazine'),
+					value:    attributes.buttonText || '',
+					onChange: function (val) { setAttributes({ buttonText: val }); }
+				}) : null,
+
+				attributes.showButton !== false ? createElement(
+					'div',
+					{ className: 'components-base-control' },
+					createElement('label', { className: 'components-base-control__label', style: { display: 'block', marginBottom: '4px' } }, i18n.__('URL de destino', 'wp_bunnymagazine')),
+					createElement(URLInput, {
+						value:    attributes.url || '',
+						onChange: function (val) { setAttributes({ url: val }); }
+					})
+				) : null,
+
+				attributes.showButton !== false ? createElement(ToggleControl, {
+					label:    i18n.__('Abrir en nueva pestaña', 'wp_bunnymagazine'),
+					checked:  attributes.openInNewTab !== false,
+					onChange: function (val) { setAttributes({ openInNewTab: val }); }
+				}) : null
+			)
+		);
+	}
+
 	// ── Block attribute schema ────────────────────────────────────────────────
 
 	function blockAttributes(layout) {
+		// Static layouts declare their own attributes in layout.json.
+		// Skip all query-related attributes so the schema matches PHP exactly.
+		if (layout && layout.type === 'static') {
+			var staticAttrs = {};
+			if (layout.attributes && typeof layout.attributes === 'object') {
+				Object.assign(staticAttrs, layout.attributes);
+			}
+			return staticAttrs;
+		}
+
 		var block    = layout.block || {};
 		var query    = block.query || {};
 		var controls = block.controls || {};
 
 		var attributes = {
 			limit:              { type: 'integer', default: query.limit || 1 },
-			// Content source (new).
 			contentSource:      { type: 'string',  default: 'latest_posts' },
-			// Period (new) — only used by wpam_top_posts.
 			period:             { type: 'string',  default: 'week' },
-			// Filters (pre-existing).
 			categoriesInclude:  { type: 'array', default: [], items: { type: 'integer' } },
 			categoriesExclude:  { type: 'array', default: [], items: { type: 'integer' } },
 			tagsInclude:        { type: 'array', default: [], items: { type: 'integer' } },
@@ -382,6 +597,10 @@
 			authorsExclude:     { type: 'array', default: [], items: { type: 'integer' } },
 			ctaLabel:           { type: 'string', default: block.ctaLabel || i18n.__('Read more', 'wp_bunnymagazine') },
 		};
+
+		if (layout.attributes) {
+			Object.assign(attributes, layout.attributes);
+		}
 
 		if (controls.categorySelector) {
 			attributes.categoryId = { type: 'integer', default: 0 };
@@ -396,26 +615,26 @@
 
 	// ── Edit factory ─────────────────────────────────────────────────────────
 
-	function editFactory(layoutSlug, controls) {
+	function editFactory(slug, layout, controls) {
 		return function (props) {
-
 			var blockProps = useBlockProps({
 				className: 'wpbm-editor-block'
 			});
 
+			var isStatic = (layout && layout.type === 'static') || slug === 'social-profile';
+			var controlsElement = isStatic
+				? socialProfileControls(props)
+				: commonControls(props, controls);
+
 			return createElement(
 				'div',
 				blockProps,
-
-				commonControls(props, controls),
-
+				controlsElement,
 				createElement(
 					'div',
-					{
-						className: 'wpbm-editor-preview'
-					},
+					{ className: 'wpbm-editor-preview' },
 					createElement(ServerSideRender, {
-						block: 'wp-bunnymagazine/' + layoutSlug,
+						block: 'wp-bunnymagazine/' + slug,
 						attributes: props.attributes
 					})
 				)
@@ -440,7 +659,7 @@
 			icon:        'layout',
 			supports:    { html: false },
 			attributes:  blockAttributes(layout),
-			edit:        editFactory(slug, Object.assign({}, controls, {
+			edit:        editFactory(slug, layout, Object.assign({}, controls, {
 				limitMin: query.minItems || 1,
 				limitMax: query.maxItems || query.limit || 1,
 			})),

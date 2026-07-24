@@ -1,0 +1,83 @@
+{
+  "title": "Profile Card",
+  "description": "Tarjeta de perfil moderna y reutilizable para redes sociales, creadores, patrocinadores y partners.",
+  "type": "static",
+  "block": {
+    "title": "Bunny Magazine Profile Card",
+    "description": "Tarjeta de perfil configurable para redes sociales, creadores, afiliados y patrocinadores."
+  },
+  "attributes": {
+    "profileType": {
+      "type": "string",
+      "default": "instagram"
+    },
+    "name": {
+      "type": "string",
+      "default": "BunnyChase"
+    },
+    "showName": {
+      "type": "boolean",
+      "default": true
+    },
+    "username": {
+      "type": "string",
+      "default": "@bunnychase.of"
+    },
+    "showUsername": {
+      "type": "boolean",
+      "default": true
+    },
+    "description": {
+      "type": "string",
+      "default": "Sigue nuestra cuenta oficial para descubrir el contenido más reciente y exclusivo."
+    },
+    "showDescription": {
+      "type": "boolean",
+      "default": true
+    },
+    "styleVariant": {
+      "type": "string",
+      "default": "brand"
+    },
+    "alignment": {
+      "type": "string",
+      "default": "left"
+    },
+    "placeholderType": {
+      "type": "string",
+      "default": "none"
+    },
+    "placeholderGridSize": {
+      "type": "string",
+      "default": "2x3"
+    },
+    "placeholderPosition": {
+      "type": "string",
+      "default": "after_description"
+    },
+    "placeholderImage": {
+      "type": "string",
+      "default": ""
+    },
+    "showButton": {
+      "type": "boolean",
+      "default": true
+    },
+    "buttonText": {
+      "type": "string",
+      "default": "Seguir en Instagram"
+    },
+    "url": {
+      "type": "string",
+      "default": "https://instagram.com/bunnychase.of"
+    },
+    "openInNewTab": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "assets": {
+    "style": "style.css",
+    "editor": "editor.css"
+  }
+}

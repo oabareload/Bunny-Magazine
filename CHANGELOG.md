@@ -2,6 +2,42 @@
 
 All notable changes to Bunny Magazine are documented in this file.
 
+## 1.4.1
+
+### Added
+
+- **Profile Card – Image placeholder mode**: New `placeholderType` value `image` adds a third content visual mode alongside `none` and `grid`.
+- New `placeholderImage` attribute (`string`, default `""`) stores the URL of an image selected from the WordPress Media Library.
+- Native Gutenberg `MediaUpload` / `MediaUploadCheck` controls in the editor panel: select, replace, and remove an image without any external dependencies.
+- `render.php`: when `placeholderType === 'image'` and a valid URL is present, renders a decorative `<img loading="lazy" decoding="async" alt="">` wrapped in an `aria-hidden="true"` container.
+- `style.css`: `.wpbm-social-profile__image` uses `aspect-ratio: 16/9`, `object-fit: cover`, matching `border-radius`, and `overflow: hidden` to prevent CLS and maintain visual consistency with the grid placeholder.
+
+### Notes
+
+- 0 JavaScript on the frontend. No HTTP requests. No external libraries.
+- Existing blocks with `placeholderType: grid` or `none` are fully unaffected.
+- The image position respects the existing `placeholderPosition` setting (`before_description` / `after_description`).
+
+## 1.4.0
+
+### Added
+
+- New **Profile Card** (`social-profile`) layout component for displaying social media, creator, affiliate, and partner profiles.
+- PHP Icon Library (`core/icons/`) featuring 10 lightweight, inline SVG icons (`instagram`, `facebook`, `youtube`, `tiktok`, `x`, `discord`, `patreon`, `kofi`, `website`, `generic`) using `currentColor`.
+- Flexible layout controls:
+  - `styleVariant`: Brand colors (official brand backgrounds/hovers) or Theme style (inheriting site colors).
+  - `alignment`: Left or Center alignment for card content and header.
+  - `placeholderType` & `placeholderGridSize`: Pure CSS post placeholders with 5 fixed grid dimensions (`2x2`, `2x3`, `3x3`, `3x4`, `3x5`).
+  - `placeholderPosition`: Position grid `before_description` or `after_description`.
+  - Header & Button toggles: Independent visibility for name, username, description, and button.
+  - Native WordPress `URLInput` control integration in Gutenberg.
+
+### Improved
+
+- `Block_Registry` and `Layout_Registry` updated to support `static` layout types, bypassing unnecessary `WP_Query` database execution.
+- Flexbox equal height card layout (`height: 100%`) with bottom-aligned action button (`margin-top: auto`).
+- Guaranteed 0 JavaScript files enqueued on the frontend for static layouts.
+
 ## 1.3.0
 
 ### Added
