@@ -2,6 +2,19 @@
 
 All notable changes to Bunny Magazine are documented in this file.
 
+## 1.4.2
+
+### Fixed
+
+- **Profile Card placeholder image flow**: the selected `placeholderImage` value now reaches the server-side render correctly from the editor, through the block attributes, and into the layout template.
+- **Layout-type dispatch in the editor**: the Gutenberg editor now chooses its controls based on `layout.type` instead of depending on the `social-profile` slug. This keeps the architecture extensible for future specialized layout types such as `social`, `static`, and other non-query layouts.
+- **Schema registration consistency**: non-query layouts are now handled through the same type-based path, avoiding the mismatch that had left specialized attributes like `placeholderImage` out of sync.
+
+### Improved
+
+- The Profile Card render now uses `esc_url()` for the placeholder image output, keeping the template safe and consistent.
+- The layout registry now refreshes its manifest when layout files change, so newly added attributes are picked up without stale cache issues.
+
 ## 1.4.1
 
 ### Added

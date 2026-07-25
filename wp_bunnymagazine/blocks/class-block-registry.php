@@ -133,7 +133,7 @@ final class Block_Registry
 		}
 
 		$posts = [];
-		if (($layout['type'] ?? 'query') !== 'static') {
+		if (self::is_query_layout($layout)) {
 			if (self::$query_manager === null) {
 				return '';
 			}
@@ -251,6 +251,11 @@ final class Block_Registry
 		];
 	}
 
+	private static function is_query_layout(array $layout): bool
+	{
+		return (string) ($layout['type'] ?? 'query') === 'query';
+	}
+
 	/**
 	 * Build the Gutenberg block attributes schema.
 	 *
@@ -264,8 +269,10 @@ final class Block_Registry
 	 */
 	private static function attributes_schema(array $layout): array
 	{
-		// Static layouts: return only layout-declared attributes.
-		if (($layout['type'] ?? 'query') === 'static') {
+		// Non-query layouts (static, social, or future specialized types): return
+		// only the layout-declared attributes so the server side schema matches
+		// the editor state for these blocks.
+		if (!self::is_query_layout($layout)) {
 			return is_array($layout['attributes'] ?? null) ? $layout['attributes'] : [];
 		}
 

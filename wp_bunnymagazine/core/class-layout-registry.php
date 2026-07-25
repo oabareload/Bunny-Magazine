@@ -23,14 +23,20 @@ final class Layout_Registry
 		}
 
 		if (self::$cache !== null) {
-			return self::$cache;
+			if (!self::manifest_needs_refresh()) {
+				return self::$cache;
+			}
+			self::$cache = null;
+			self::$cache_scanned_at = 0;
 		}
 
 		$stored = get_transient(self::MANIFEST_KEY);
 		if (is_array($stored)) {
-			self::$cache = $stored;
-			self::$cache_scanned_at = (int) get_option(self::SCANNED_AT_KEY, 0);
-			return self::$cache;
+			if (!self::manifest_needs_refresh()) {
+				self::$cache = $stored;
+				self::$cache_scanned_at = (int) get_option(self::SCANNED_AT_KEY, 0);
+				return self::$cache;
+			}
 		}
 
 		self::$cache = self::scan();
@@ -118,6 +124,26 @@ final class Layout_Registry
 	{
 		delete_transient(self::MANIFEST_KEY);
 		self::$cache = null;
+	}
+
+	private static function manifest_needs_refresh(): bool
+	{
+		$scanned_at = self::$cache_scanned_at > 0 ? self::$cache_scanned_at : (int) get_option(self::SCANNED_AT_KEY, 0);
+		if ($scanned_at <= 0) {
+			return false;
+		}
+
+		$base_dir = trailingslashit(WPMB_PATH . 'layouts');
+		foreach (glob($base_dir . '*', GLOB_ONLYDIR) ?: [] as $dir) {
+			foreach (['layout.json', 'render.php'] as $file_name) {
+				$file = $dir . DIRECTORY_SEPARATOR . $file_name;
+				if (is_readable($file) && filemtime($file) > $scanned_at) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	private static function scan(): array

@@ -88,7 +88,7 @@ $classes = [
 				?>
 				<div class="wpbm-social-profile__image" aria-hidden="true">
 					<img
-						src="<?php echo $placeholder_image; ?>"
+						src="<?php echo esc_url($placeholder_image); ?>"
 						alt=""
 						loading="lazy"
 						decoding="async"

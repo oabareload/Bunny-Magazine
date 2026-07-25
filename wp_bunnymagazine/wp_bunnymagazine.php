@@ -3,7 +3,7 @@
  * Plugin Name:       Bunny Magazine
  * Plugin URI:        https://bunnychase.net/bunny-magazine/
  * Description:       Editorial Gutenberg layouts for magazine-style WordPress pages.
- * Version:           1.4.1
+ * Version:           1.4.2
  * Requires at least: 6.0
  * Requires PHP:      8.0
  * Author:            BunnyChase
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-define('WPMB_VERSION', '1.4.1');
+define('WPMB_VERSION', '1.4.2');
 define('WPMB_FILE', __FILE__);
 define('WPMB_PATH', plugin_dir_path(__FILE__));
 define('WPMB_URL', plugin_dir_url(__FILE__));

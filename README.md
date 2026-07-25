@@ -27,6 +27,12 @@ Included static components:
 
 Each layout is automatically discovered from its own folder and registered without hardcoded definitions.
 
+### Recent updates (1.4.2)
+
+- Fixed the Profile Card image placeholder flow so the selected media URL now reaches the server render correctly.
+- Refactored the editor to dispatch specialized controls by `layout.type` rather than relying on the `social-profile` slug, making future layout types easier to extend.
+- Improved layout registration and manifest refresh behavior so layout changes are picked up more reliably.
+
 ---
 
 ### Content Sources
@@ -108,7 +114,7 @@ Render Template
 
 Registers every Gutenberg block discovered by the Layout Registry, exposes block attributes (content source, filters, period, layout-specific controls), and resolves block attributes into the normalized config consumed by the Query Manager.
 
-Layouts with `"type": "static"` in their `layout.json` are registered as fully static blocks. They skip the Query Manager entirely — no `WP_Query` is executed and no content source is exposed. Their attributes are passed directly to `render.php`.
+Layouts with `"type": "static"` or other non-query specialized types such as `social` in their `layout.json` are registered as fully static blocks. They skip the Query Manager entirely — no `WP_Query` is executed and no content source is exposed. Their attributes are passed directly to `render.php`, and the editor dispatches its controls according to `layout.type`.
 
 ### Query Manager
 

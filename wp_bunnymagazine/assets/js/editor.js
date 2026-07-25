@@ -571,14 +571,14 @@
 	// ── Block attribute schema ────────────────────────────────────────────────
 
 	function blockAttributes(layout) {
-		// Static layouts declare their own attributes in layout.json.
-		// Skip all query-related attributes so the schema matches PHP exactly.
-		if (layout && layout.type === 'static') {
-			var staticAttrs = {};
+		// Specialized layouts (such as social) declare their own attributes in
+		// layout.json. Skip all query-related attributes so the schema matches PHP.
+		if (layout && layout.type && String(layout.type) !== 'query') {
+			var specializedAttrs = {};
 			if (layout.attributes && typeof layout.attributes === 'object') {
-				Object.assign(staticAttrs, layout.attributes);
+				Object.assign(specializedAttrs, layout.attributes);
 			}
-			return staticAttrs;
+			return specializedAttrs;
 		}
 
 		var block    = layout.block || {};
@@ -615,16 +615,27 @@
 
 	// ── Edit factory ─────────────────────────────────────────────────────────
 
+	function getControlsElement(layout, props, controls) {
+		var layoutType = layout && layout.type ? String(layout.type) : 'query';
+
+		if (layoutType === 'social') {
+			return socialProfileControls(props);
+		}
+
+		if (layoutType === 'static') {
+			return null;
+		}
+
+		return commonControls(props, controls);
+	}
+
 	function editFactory(slug, layout, controls) {
 		return function (props) {
 			var blockProps = useBlockProps({
 				className: 'wpbm-editor-block'
 			});
 
-			var isStatic = (layout && layout.type === 'static') || slug === 'social-profile';
-			var controlsElement = isStatic
-				? socialProfileControls(props)
-				: commonControls(props, controls);
+			var controlsElement = getControlsElement(layout, props, controls);
 
 			return createElement(
 				'div',
