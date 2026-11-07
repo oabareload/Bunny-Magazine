@@ -4,6 +4,14 @@
 
 Unlike page builders, Bunny Magazine focuses on displaying existing content through reusable editorial layouts, shared query logic, and intelligent caching. Layouts are fully server-rendered, configurable through Gutenberg, and designed to remain fast, maintainable, and extensible.
 
+## Plugin Metadata
+
+- **Plugin Name:** Bunny Magazine
+- **Plugin URI:** https://bunnychase.net/bunny-magazine/
+- **Author:** BunnyChase
+- **Author URI / Sitio oficial:** https://bunnychase.net/
+- **License:** GNU General Public License v2.0 (GPL-2.0-only)
+
 ---
 
 ## Features
